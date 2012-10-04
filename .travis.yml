@@ -1,0 +1,9 @@
+language: go
+before_install:
+  - apt-get update -qq
+  - apt-get install bzr libyaml-dev -qq
+install:
+  - go get -d ./...
+  - go get launchpad.net/gocheck
+script:
+  - go test
