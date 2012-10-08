@@ -92,7 +92,7 @@ func GetBool(key string) (bool, error) {
 	return false, fmt.Errorf("key %s has non-boolean value", key)
 }
 
-// mergeMaps takes two maps and merge its keys and values.
+// mergeMaps takes two maps and merge its keys and values recursively.
 //
 // In case of conflicts, the function picks value from map2.
 func mergeMaps(map1, map2 map[interface{}]interface{}) map[interface{}]interface{} {
