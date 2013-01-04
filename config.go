@@ -111,7 +111,9 @@ func GetList(key string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	if v, ok := value.([]interface{}); ok {
+	switch value.(type) {
+	case []interface{}:
+		v := value.([]interface{})
 		result := make([]string, len(v))
 		for i, item := range v {
 			switch item.(type) {
@@ -130,6 +132,8 @@ func GetList(key string) ([]string, error) {
 			}
 		}
 		return result, nil
+	case []string:
+		return value.([]string), nil
 	}
 	return nil, fmt.Errorf("key %q is not a list", key)
 }

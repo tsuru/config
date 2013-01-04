@@ -169,9 +169,15 @@ func (s *S) TestGetList(c *C) {
 			expected: nil,
 			err:      errors.New(`key "fakebool" is not a list`),
 		},
+		{
+			key:      "dynamic",
+			expected: []string{"Mary", "Petter"},
+			err:      nil,
+		},
 	}
 	err := ReadConfigFile("testdata/config.yml")
 	c.Assert(err, IsNil)
+	Set("dynamic", []string{"Mary", "Petter"})
 	for _, t := range tests {
 		values, err := GetList(t.key)
 		c.Check(err, DeepEquals, t.err)
