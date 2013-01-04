@@ -5,7 +5,6 @@
 package config
 
 import (
-	"errors"
 	. "launchpad.net/gocheck"
 	"runtime"
 	"testing"
@@ -90,11 +89,11 @@ func (s *S) TestGetConfigReturnErrorsIfTheKeyIsNotFound(c *C) {
 	value, err := Get("xpta")
 	c.Assert(value, IsNil)
 	c.Assert(err, NotNil)
-	c.Assert(err, ErrorMatches, "^key xpta not found$")
+	c.Assert(err.Error(), Equals, `key "xpta" not found`)
 	value, err = Get("database:hhh")
 	c.Assert(value, IsNil)
 	c.Assert(err, NotNil)
-	c.Assert(err, ErrorMatches, "^key database:hhh not found$")
+	c.Assert(err.Error(), Equals, `key "database:hhh" not found`)
 }
 
 func (s *S) TestGetString(c *C) {
@@ -116,7 +115,7 @@ func (s *S) TestGetStringShouldReturnErrorIfTheKeyDoesNotRepresentAString(c *C) 
 	value, err := GetString("database:port")
 	c.Assert(value, Equals, "")
 	c.Assert(err, NotNil)
-	c.Assert(err, ErrorMatches, "^key database:port has non-string value$")
+	c.Assert(err, ErrorMatches, `value for the key "database:port" is not a string`)
 }
 
 func (s *S) TestGetStringShouldReturnErrorIfTheKeyDoesNotExist(c *C) {
@@ -126,7 +125,7 @@ func (s *S) TestGetStringShouldReturnErrorIfTheKeyDoesNotExist(c *C) {
 	value, err := GetString("xpta")
 	c.Assert(value, Equals, "")
 	c.Assert(err, NotNil)
-	c.Assert(err, ErrorMatches, "^key xpta not found$")
+	c.Assert(err, ErrorMatches, `key "xpta" not found`)
 }
 
 func (s *S) TestGetBool(c *C) {
@@ -145,7 +144,7 @@ func (s *S) TestGetBoolWithNonBoolConfValue(c *C) {
 	value, err := GetBool("fakebool")
 	c.Assert(value, Equals, false)
 	c.Assert(err, NotNil)
-	c.Assert(err, ErrorMatches, "^key fakebool has non-boolean value$")
+	c.Assert(err, ErrorMatches, `value for the key "fakebool" is not a boolean`)
 }
 
 func (s *S) TestGetList(c *C) {
@@ -167,7 +166,7 @@ func (s *S) TestGetList(c *C) {
 		{
 			key:      "fakebool",
 			expected: nil,
-			err:      errors.New(`key "fakebool" is not a list`),
+			err:      &invalidValue{"fakebool", "list"},
 		},
 		{
 			key:      "dynamic",
@@ -247,7 +246,7 @@ func (s *S) TestUnsetWithUndefinedKey(c *C) {
 	c.Assert(err, IsNil)
 	err = Unset("database:hoster")
 	c.Assert(err, NotNil)
-	c.Assert(err, ErrorMatches, "^Key database:hoster not found$")
+	c.Assert(err.Error(), Equals, `Key "database:hoster" not found`)
 }
 
 func (s *S) TestUnsetMap(c *C) {

@@ -7,7 +7,6 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"launchpad.net/goyaml"
@@ -55,12 +54,12 @@ func Get(key string) (interface{}, error) {
 	keys := strings.Split(key, ":")
 	conf, ok := configs[keys[0]]
 	if !ok {
-		return nil, fmt.Errorf("key %s not found", key)
+		return nil, fmt.Errorf("key %q not found", key)
 	}
 	for _, k := range keys[1:] {
 		conf, ok = conf.(map[interface{}]interface{})[k]
 		if !ok {
-			return nil, fmt.Errorf("key %s not found", key)
+			return nil, fmt.Errorf("key %q not found", key)
 		}
 	}
 	return conf, nil
@@ -78,7 +77,7 @@ func GetString(key string) (string, error) {
 	if v, ok := value.(string); ok {
 		return v, nil
 	}
-	return "", fmt.Errorf("key %s has non-string value", key)
+	return "", &invalidValue{key, "string"}
 }
 
 // GetBool does a type assertion before returning the requested value
@@ -90,7 +89,7 @@ func GetBool(key string) (bool, error) {
 	if v, ok := value.(bool); ok {
 		return v, nil
 	}
-	return false, fmt.Errorf("key %s has non-boolean value", key)
+	return false, &invalidValue{key, "boolean"}
 }
 
 // GetList works like Get, but returns a slice of strings instead. It must be
@@ -135,7 +134,7 @@ func GetList(key string) ([]string, error) {
 	case []string:
 		return value.([]string), nil
 	}
-	return nil, fmt.Errorf("key %q is not a list", key)
+	return nil, &invalidValue{key, "list"}
 }
 
 // mergeMaps takes two maps and merge its keys and values recursively.
@@ -206,9 +205,18 @@ func Unset(key string) error {
 				break
 			}
 		} else {
-			return errors.New("Key " + key + " not found")
+			return fmt.Errorf("Key %q not found", key)
 		}
 	}
 	delete(m, part)
 	return nil
+}
+
+type invalidValue struct {
+	key  string
+	kind string
+}
+
+func (e *invalidValue) Error() string {
+	return fmt.Sprintf("value for the key %q is not a %s", e.key, e.kind)
 }
