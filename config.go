@@ -1,4 +1,4 @@
-// Copyright 2012 config authors. All rights reserved.
+// Copyright 2013 config authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"launchpad.net/goyaml"
+	"strconv"
 	"strings"
 )
 
@@ -90,6 +91,47 @@ func GetBool(key string) (bool, error) {
 		return v, nil
 	}
 	return false, fmt.Errorf("key %s has non-boolean value", key)
+}
+
+// GetList works like Get, but returns a slice of strings instead. It must be
+// written down in the config as YAML lists.
+//
+// Here are two example of YAML lists:
+//
+//   names:
+//     - Mary
+//     - John
+//     - Paul
+//     - Petter
+//
+// If GetList find an item that is not a string (for example 5.08734792), it
+// will convert the item.
+func GetList(key string) ([]string, error) {
+	value, err := Get(key)
+	if err != nil {
+		return nil, err
+	}
+	if v, ok := value.([]interface{}); ok {
+		result := make([]string, len(v))
+		for i, item := range v {
+			switch item.(type) {
+			case fmt.Stringer:
+				result[i] = item.(fmt.Stringer).String()
+			case int:
+				result[i] = strconv.Itoa(item.(int))
+			case bool:
+				result[i] = strconv.FormatBool(item.(bool))
+			case float64:
+				result[i] = strconv.FormatFloat(item.(float64), 'f', -1, 64)
+			case string:
+				result[i] = item.(string)
+			default:
+				result[i] = fmt.Sprintf("%v", item)
+			}
+		}
+		return result, nil
+	}
+	return nil, fmt.Errorf("key %q is not a list", key)
 }
 
 // mergeMaps takes two maps and merge its keys and values recursively.

@@ -1,10 +1,11 @@
-// Copyright 2012 config authors. All rights reserved.
+// Copyright 2013 config authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 package config
 
 import (
+	"errors"
 	. "launchpad.net/gocheck"
 	"runtime"
 	"testing"
@@ -25,9 +26,11 @@ var expected = map[interface{}]interface{}{
 		"salt": "xpto",
 		"key":  "sometoken1234",
 	},
-	"xpto":     "ble",
-	"istrue":   false,
-	"fakebool": "foo",
+	"xpto":           "ble",
+	"istrue":         false,
+	"fakebool":       "foo",
+	"names":          []interface{}{"Mary", "John", "Anthony", "Gopher"},
+	"multiple-types": []interface{}{"Mary", 50, 5.3, true},
 }
 
 func (s *S) TearDownTest(c *C) {
@@ -45,6 +48,16 @@ auth:
 xpto: ble
 istrue: false
 fakebool: foo
+names:
+  - Mary
+  - John
+  - Anthony
+  - Gopher
+multiple-types:
+  - Mary
+  - 50
+  - 5.3
+  - true
 `
 	err := ReadConfigBytes([]byte(conf))
 	c.Assert(err, IsNil)
@@ -133,6 +146,37 @@ func (s *S) TestGetBoolWithNonBoolConfValue(c *C) {
 	c.Assert(value, Equals, false)
 	c.Assert(err, NotNil)
 	c.Assert(err, ErrorMatches, "^key fakebool has non-boolean value$")
+}
+
+func (s *S) TestGetList(c *C) {
+	var tests = []struct {
+		key      string
+		expected []string
+		err      error
+	}{
+		{
+			key:      "names",
+			expected: []string{"Mary", "John", "Anthony", "Gopher"},
+			err:      nil,
+		},
+		{
+			key:      "multiple-types",
+			expected: []string{"Mary", "50", "5.3", "true"},
+			err:      nil,
+		},
+		{
+			key:      "fakebool",
+			expected: nil,
+			err:      errors.New(`key "fakebool" is not a list`),
+		},
+	}
+	err := ReadConfigFile("testdata/config.yml")
+	c.Assert(err, IsNil)
+	for _, t := range tests {
+		values, err := GetList(t.key)
+		c.Check(err, DeepEquals, t.err)
+		c.Check(values, DeepEquals, t.expected)
+	}
 }
 
 func (s *S) TestSet(c *C) {

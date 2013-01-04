@@ -1,4 +1,4 @@
-# Copyright 2012 config authors. All rights reserved.
+# Copyright 2013 config authors. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
@@ -11,3 +11,13 @@ auth:
 xpto: ble
 istrue: false
 fakebool: foo
+names:
+  - Mary
+  - John
+  - Anthony
+  - Gopher
+multiple-types:
+  - Mary
+  - 50
+  - 5.3
+  - true
