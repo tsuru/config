@@ -12,9 +12,13 @@ import (
 	"launchpad.net/goyaml"
 	"strconv"
 	"strings"
+	"sync"
 )
 
-var configs map[interface{}]interface{}
+var (
+	configs map[interface{}]interface{}
+	mut     sync.Mutex
+)
 
 // ReadConfigBytes receives a slice of bytes and builds the internal
 // configuration object.
@@ -22,6 +26,8 @@ var configs map[interface{}]interface{}
 // If the given slice is not a valid yaml file, ReadConfigBytes returns a
 // non-nil error.
 func ReadConfigBytes(data []byte) error {
+	mut.Lock()
+	defer mut.Unlock()
 	return goyaml.Unmarshal(data, &configs)
 }
 
@@ -52,7 +58,9 @@ func ReadConfigFile(filePath string) error {
 // "port" would return an error.
 func Get(key string) (interface{}, error) {
 	keys := strings.Split(key, ":")
+	mut.Lock()
 	conf, ok := configs[keys[0]]
+	mut.Unlock()
 	if !ok {
 		return nil, fmt.Errorf("key %q not found", key)
 	}
@@ -184,7 +192,9 @@ func Set(key string, value interface{}) {
 			parts[i]: last,
 		}
 	}
+	mut.Lock()
 	configs = mergeMaps(configs, last)
+	mut.Unlock()
 }
 
 // Unset removes a key from the configuration map. It returns error if the key
@@ -195,6 +205,8 @@ func Set(key string, value interface{}) {
 func Unset(key string) error {
 	var i int
 	var part string
+	mut.Lock()
+	defer mut.Unlock()
 	m := configs
 	parts := strings.Split(key, ":")
 	for i, part = range parts {
