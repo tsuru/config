@@ -40,5 +40,4 @@ func (s *S) TestConfigFunctionsAreThreadSafe(c *C) {
 		wg.Done()
 	}()
 	wg.Wait()
-	c.Assert(configs, HasLen, 1)
 }

@@ -17,7 +17,7 @@ import (
 
 var (
 	configs map[interface{}]interface{}
-	mut     sync.Mutex
+	mut     sync.RWMutex
 )
 
 // ReadConfigBytes receives a slice of bytes and builds the internal
@@ -58,9 +58,9 @@ func ReadConfigFile(filePath string) error {
 // "port" would return an error.
 func Get(key string) (interface{}, error) {
 	keys := strings.Split(key, ":")
-	mut.Lock()
+	mut.RLock()
 	conf, ok := configs[keys[0]]
-	mut.Unlock()
+	mut.RUnlock()
 	if !ok {
 		return nil, fmt.Errorf("key %q not found", key)
 	}
