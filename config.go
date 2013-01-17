@@ -8,8 +8,10 @@ package config
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"launchpad.net/goyaml"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -42,6 +44,33 @@ func ReadConfigFile(filePath string) error {
 		return err
 	}
 	return ReadConfigBytes(data)
+}
+
+// WriteConfigFile writes the configuration to the disc, using the given path.
+// The configuration is serialized in YAML format.
+//
+// This function will create the file if it does not exist, setting permissions
+// to "perm".
+func WriteConfigFile(filePath string, perm os.FileMode) error {
+	mut.RLock()
+	b, err := goyaml.Marshal(configs)
+	mut.RUnlock()
+	if err != nil {
+		return err
+	}
+	f, err := os.OpenFile(filePath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY|os.O_EXCL, perm)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	n, err := f.Write(b)
+	if err != nil {
+		return err
+	}
+	if n != len(b) {
+		return io.ErrShortWrite
+	}
+	return nil
 }
 
 // Get returns the value for the given key, or an eror if the key is undefined.

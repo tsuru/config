@@ -7,6 +7,7 @@ package config
 import (
 	. "launchpad.net/gocheck"
 	"runtime"
+	"os"
 	"testing"
 )
 
@@ -68,6 +69,39 @@ func (s *S) TestConfigFile(c *C) {
 	err := ReadConfigFile(configFile)
 	c.Assert(err, IsNil)
 	c.Assert(configs, DeepEquals, expected)
+}
+
+func (s *S) TestWriteConfigFile(c *C) {
+	Set("database:host", "127.0.0.1")
+	Set("database:port", 3306)
+	Set("database:user", "root")
+	Set("database:password", "s3cr3t")
+	Set("database:name", "mydatabase")
+	Set("something", "otherthing")
+	err := WriteConfigFile("/tmp/config-test.yaml", 0644)
+	c.Assert(err, IsNil)
+	defer os.Remove("/tmp/config-test.yaml")
+	configs = nil
+	err = ReadConfigFile("/tmp/config-test.yaml")
+	c.Assert(err, IsNil)
+	v, err := Get("database:host")
+	c.Assert(err, IsNil)
+	c.Assert(v, Equals, "127.0.0.1")
+	v, err = Get("database:port")
+	c.Assert(err, IsNil)
+	c.Assert(v, Equals, 3306)
+	v, err = Get("database:user")
+	c.Assert(err, IsNil)
+	c.Assert(v, Equals, "root")
+	v, err = Get("database:password")
+	c.Assert(err, IsNil)
+	c.Assert(v, Equals, "s3cr3t")
+	v, err = Get("database:name")
+	c.Assert(err, IsNil)
+	c.Assert(v, Equals, "mydatabase")
+	v, err = Get("something")
+	c.Assert(err, IsNil)
+	c.Assert(v, Equals, "otherthing")
 }
 
 func (s *S) TestGetConfig(c *C) {
