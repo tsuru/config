@@ -253,6 +253,13 @@ func (s *S) TestGetList(c *C) {
 	}
 }
 
+func (s *S) TestGetListUndeclaredValue(c *C) {
+	value, err := GetList("something-unknown")
+	c.Assert(value, IsNil)
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, `key "something-unknown" not found`)
+}
+
 func (s *S) TestSet(c *C) {
 	err := ReadConfigFile("testdata/config.yml")
 	c.Assert(err, IsNil)
