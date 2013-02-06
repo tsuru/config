@@ -198,8 +198,6 @@ func GetList(key string) ([]string, error) {
 		result := make([]string, len(v))
 		for i, item := range v {
 			switch item.(type) {
-			case fmt.Stringer:
-				result[i] = item.(fmt.Stringer).String()
 			case int:
 				result[i] = strconv.Itoa(item.(int))
 			case bool:
