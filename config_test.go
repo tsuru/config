@@ -199,6 +199,13 @@ func (s *S) TestGetBoolWithNonBoolConfValue(c *C) {
 	c.Assert(err, ErrorMatches, `value for the key "fakebool" is not a boolean`)
 }
 
+func (s *S) TestGetBoolUndeclaredValue(c *C) {
+	value, err := GetBool("something-unknown")
+	c.Assert(value, Equals, false)
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, `key "something-unknown" not found`)
+}
+
 func (s *S) TestGetList(c *C) {
 	var tests = []struct {
 		key      string
