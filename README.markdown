@@ -5,4 +5,4 @@
 Config is a Go package to manage yaml configuration files.
 
 For usage information, read our package documentation:
-<http://go.pkgdoc.org/github.com/globocom/config>.
+<http://godoc.org/github.com/globocom/config>.
