@@ -8,6 +8,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/howeyc/fsnotify"
 	"io"
 	"io/ioutil"
 	"launchpad.net/goyaml"
@@ -22,6 +23,10 @@ var (
 	mut     sync.RWMutex
 )
 
+func readConfigBytes(data []byte, out interface{}) error {
+	return goyaml.Unmarshal(data, out)
+}
+
 // ReadConfigBytes receives a slice of bytes and builds the internal
 // configuration object.
 //
@@ -30,7 +35,15 @@ var (
 func ReadConfigBytes(data []byte) error {
 	mut.Lock()
 	defer mut.Unlock()
-	return goyaml.Unmarshal(data, &configs)
+	return readConfigBytes(data, &configs)
+}
+
+func readConfigFile(filePath string, out interface{}) error {
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+	return readConfigBytes(data, out)
 }
 
 // ReadConfigFile reads the content of a file and calls ReadConfigBytes to
@@ -39,11 +52,43 @@ func ReadConfigBytes(data []byte) error {
 // It returns error if it can not read the given file or if the file contents
 // is not valid yaml.
 func ReadConfigFile(filePath string) error {
-	data, err := ioutil.ReadFile(filePath)
+	return readConfigFile(filePath, &configs)
+}
+
+// ReadAndWatchConfigFile reads and watchs for changes in the configuration
+// file. Whenever the file change, and its contents are valid YAML, the
+// configuration gets updated. With this function, daemons that use this
+// package may reload configuration without restarting.
+func ReadAndWatchConfigFile(filePath string) error {
+	err := ReadConfigFile(filePath)
 	if err != nil {
 		return err
 	}
-	return ReadConfigBytes(data)
+	w, err := fsnotify.NewWatcher()
+	if err != nil {
+		return err
+	}
+	err = w.Watch(filePath)
+	if err != nil {
+		return err
+	}
+	go func() {
+		for {
+			select {
+			case e := <-w.Event:
+				if e.IsModify() {
+					var tmp map[interface{}]interface{}
+					if readConfigFile(filePath, &tmp) == nil {
+						mut.Lock()
+						configs = tmp
+						mut.Unlock()
+					}
+				}
+			case <-w.Error: // just ignore errors
+			}
+		}
+	}()
+	return nil
 }
 
 // WriteConfigFile writes the configuration to the disc, using the given path.

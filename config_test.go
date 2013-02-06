@@ -7,8 +7,10 @@ package config
 import (
 	. "launchpad.net/gocheck"
 	"os"
+	"os/exec"
 	"runtime"
 	"testing"
+	"time"
 )
 
 func Test(t *testing.T) { TestingT(t) }
@@ -69,6 +71,22 @@ func (s *S) TestConfigFile(c *C) {
 	err := ReadConfigFile(configFile)
 	c.Assert(err, IsNil)
 	c.Assert(configs, DeepEquals, expected)
+}
+
+func (s *S) TestWatchConfigFile(c *C) {
+	err := exec.Command("cp", "testdata/config.yml", "/tmp/config-test.yml").Run()
+	c.Assert(err, IsNil)
+	err = ReadAndWatchConfigFile("/tmp/config-test.yml")
+	c.Assert(err, IsNil)
+	c.Assert(configs, DeepEquals, expected)
+	err = exec.Command("cp", "testdata/config2.yml", "/tmp/config-test.yml").Run()
+	c.Assert(err, IsNil)
+	time.Sleep(1e9)
+	expectedAuth := map[interface{}]interface{}{
+		"salt": "xpta",
+		"key":  "sometoken1234",
+	}
+	c.Assert(configs["auth"], DeepEquals, expectedAuth)
 }
 
 func (s *S) TestWriteConfigFile(c *C) {
