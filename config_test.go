@@ -83,7 +83,9 @@ func (s *S) TestWatchConfigFile(c *C) {
 	c.Assert(err, IsNil)
 	err = ReadAndWatchConfigFile("/tmp/config-test.yml")
 	c.Assert(err, IsNil)
-	c.Assert(configs, DeepEquals, expected)
+	mut.Lock()
+	c.Check(configs, DeepEquals, expected)
+	mut.Unlock()
 	err = exec.Command("cp", "testdata/config2.yml", "/tmp/config-test.yml").Run()
 	c.Assert(err, IsNil)
 	time.Sleep(1e9)
@@ -91,7 +93,9 @@ func (s *S) TestWatchConfigFile(c *C) {
 		"salt": "xpta",
 		"key":  "sometoken1234",
 	}
-	c.Assert(configs["auth"], DeepEquals, expectedAuth)
+	mut.Lock()
+	c.Check(configs["auth"], DeepEquals, expectedAuth)
+	mut.Unlock()
 }
 
 func (s *S) TestWatchConfigFileUnknownFile(c *C) {
