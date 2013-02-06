@@ -6,8 +6,8 @@ package config
 
 import (
 	. "launchpad.net/gocheck"
-	"runtime"
 	"os"
+	"runtime"
 	"testing"
 )
 
