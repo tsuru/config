@@ -73,6 +73,11 @@ func (s *S) TestConfigFile(c *C) {
 	c.Assert(configs, DeepEquals, expected)
 }
 
+func (s *S) TestConfigFileUnknownFile(c *C) {
+	err := ReadConfigFile("/some/unknwon/file/path")
+	c.Assert(err, NotNil)
+}
+
 func (s *S) TestWatchConfigFile(c *C) {
 	err := exec.Command("cp", "testdata/config.yml", "/tmp/config-test.yml").Run()
 	c.Assert(err, IsNil)
