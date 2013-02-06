@@ -94,6 +94,11 @@ func (s *S) TestWatchConfigFile(c *C) {
 	c.Assert(configs["auth"], DeepEquals, expectedAuth)
 }
 
+func (s *S) TestWatchConfigFileUnknownFile(c *C) {
+	err := ReadAndWatchConfigFile("/some/unknwon/file/path")
+	c.Assert(err, NotNil)
+}
+
 func (s *S) TestWriteConfigFile(c *C) {
 	Set("database:host", "127.0.0.1")
 	Set("database:port", 3306)
