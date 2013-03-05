@@ -162,6 +162,21 @@ func GetString(key string) (string, error) {
 	return "", &invalidValue{key, "string"}
 }
 
+// GetInt works like Get, but doing a int type assertion before return
+// the value.
+//
+// It returns error if the key is undefined or if it is not a int.
+func GetInt(key string) (int, error) {
+	value, err := Get(key)
+	if err != nil {
+		return 0, err
+	}
+	if v, ok := value.(int); ok {
+		return v, nil
+	}
+	return 0, &invalidValue{key, "int"}
+}
+
 // GetBool does a type assertion before returning the requested value
 func GetBool(key string) (bool, error) {
 	value, err := Get(key)

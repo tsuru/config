@@ -174,6 +174,17 @@ func (s *S) TestGetString(c *C) {
 	c.Assert(value, Equals, "127.0.0.1")
 }
 
+func (s *S) TestGetInt(c *C) {
+	configFile := "testdata/config.yml"
+	err := ReadConfigFile(configFile)
+	c.Assert(err, IsNil)
+	value, err := GetInt("database:port")
+	c.Assert(err, IsNil)
+	c.Assert(value, Equals, 8080)
+	value, err = GetInt("xpto")
+	c.Assert(err, NotNil)
+}
+
 func (s *S) TestGetStringShouldReturnErrorIfTheKeyDoesNotRepresentAString(c *C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)
