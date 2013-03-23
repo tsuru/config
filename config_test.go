@@ -183,6 +183,9 @@ func (s *S) TestGetInt(c *C) {
 	c.Assert(value, Equals, 8080)
 	value, err = GetInt("xpto")
 	c.Assert(err, NotNil)
+	value, err = GetInt("something-unknown")
+	c.Assert(err, NotNil)
+	c.Assert(value, Equals, 0)
 }
 
 func (s *S) TestGetStringShouldReturnErrorIfTheKeyDoesNotRepresentAString(c *C) {
