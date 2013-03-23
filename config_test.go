@@ -5,6 +5,7 @@
 package config
 
 import (
+	"errors"
 	. "launchpad.net/gocheck"
 	"os"
 	"os/exec"
@@ -276,6 +277,14 @@ func (s *S) TestGetListUndeclaredValue(c *C) {
 	c.Assert(value, IsNil)
 	c.Assert(err, NotNil)
 	c.Assert(err.Error(), Equals, `key "something-unknown" not found`)
+}
+
+func (s *S) TestGetListWithStringers(c *C) {
+	err := errors.New("failure")
+	Set("what", []interface{}{err})
+	value, err := GetList("what")
+	c.Assert(err, IsNil)
+	c.Assert(value, DeepEquals, []string{"failure"})
 }
 
 func (s *S) TestSet(c *C) {
