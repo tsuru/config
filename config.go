@@ -11,7 +11,7 @@ import (
 	"github.com/howeyc/fsnotify"
 	"io"
 	"io/ioutil"
-	goyaml "launchpad.net/~niemeyer/goyaml/beta"
+	"launchpad.net/~niemeyer/goyaml/beta"
 	"os"
 	"strconv"
 	"strings"
