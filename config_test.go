@@ -5,6 +5,7 @@
 package config
 
 import (
+	"errors"
 	. "launchpad.net/gocheck"
 	"os"
 	"os/exec"
@@ -183,6 +184,9 @@ func (s *S) TestGetInt(c *C) {
 	c.Assert(value, Equals, 8080)
 	value, err = GetInt("xpto")
 	c.Assert(err, NotNil)
+	value, err = GetInt("something-unknown")
+	c.Assert(err, NotNil)
+	c.Assert(value, Equals, 0)
 }
 
 func (s *S) TestGetStringShouldReturnErrorIfTheKeyDoesNotRepresentAString(c *C) {
@@ -273,6 +277,14 @@ func (s *S) TestGetListUndeclaredValue(c *C) {
 	c.Assert(value, IsNil)
 	c.Assert(err, NotNil)
 	c.Assert(err.Error(), Equals, `key "something-unknown" not found`)
+}
+
+func (s *S) TestGetListWithStringers(c *C) {
+	err := errors.New("failure")
+	Set("what", []interface{}{err})
+	value, err := GetList("what")
+	c.Assert(err, IsNil)
+	c.Assert(value, DeepEquals, []string{"failure"})
 }
 
 func (s *S) TestSet(c *C) {
