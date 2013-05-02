@@ -34,6 +34,7 @@ var expected = map[interface{}]interface{}{
 	"fakebool":       "foo",
 	"names":          []interface{}{"Mary", "John", "Anthony", "Gopher"},
 	"multiple-types": []interface{}{"Mary", 50, 5.3, true},
+	"negative":       -10,
 }
 
 func (s *S) TearDownTest(c *C) {
@@ -61,6 +62,7 @@ multiple-types:
   - 50
   - 5.3
   - true
+negative: -10
 `
 	err := ReadConfigBytes([]byte(conf))
 	c.Assert(err, IsNil)
@@ -187,6 +189,21 @@ func (s *S) TestGetInt(c *C) {
 	value, err = GetInt("something-unknown")
 	c.Assert(err, NotNil)
 	c.Assert(value, Equals, 0)
+}
+
+func (s *S) TestGetUint(c *C) {
+	configFile := "testdata/config.yml"
+	err := ReadConfigFile(configFile)
+	c.Assert(err, IsNil)
+	value, err := GetUint("database:port")
+	c.Assert(err, IsNil)
+	c.Assert(value, Equals, uint(8080))
+	_, err = GetUint("negative")
+	c.Assert(err, NotNil)
+	_, err = GetUint("auth:salt")
+	c.Assert(err, NotNil)
+	_, err = GetUint("Unknown")
+	c.Assert(err, NotNil)
 }
 
 func (s *S) TestGetStringShouldReturnErrorIfTheKeyDoesNotRepresentAString(c *C) {

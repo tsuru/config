@@ -21,3 +21,4 @@ multiple-types:
   - 50
   - 5.3
   - true
+negative: -10

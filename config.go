@@ -177,6 +177,20 @@ func GetInt(key string) (int, error) {
 	return 0, &invalidValue{key, "int"}
 }
 
+func GetUint(key string) (uint, error) {
+	value, err := Get(key)
+	if err != nil {
+		return 0, err
+	}
+	if v, ok := value.(int); ok {
+		if v < 0 {
+			return 0, &invalidValue{key, "uint"}
+		}
+		return uint(v), nil
+	}
+	return 0, &invalidValue{key, "uint"}
+}
+
 // GetBool does a type assertion before returning the requested value
 func GetBool(key string) (bool, error) {
 	value, err := Get(key)
