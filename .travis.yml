@@ -1,10 +1,9 @@
 language: go
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install bzr -qq
+  - sudo apt-get update -qqy
+  - sudo apt-get install bzr -qqy
 install:
-  - go get -d ./...
+  - go get -d github.com/globocom/config
   - go get launchpad.net/gocheck
-  - go get launchpad.net/~niemeyer/goyaml/beta
 script:
-  - go test
+  - go test github.com/globocom/config
