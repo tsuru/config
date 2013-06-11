@@ -1,9 +1,10 @@
 language: go
+go: 1.1
 before_install:
   - sudo apt-get update -qqy
   - sudo apt-get install bzr -qqy
 install:
-  - go get -d github.com/globocom/config
+  - go get
   - go get launchpad.net/gocheck
 script:
-  - go test github.com/globocom/config
+  - go test
