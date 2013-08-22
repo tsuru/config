@@ -133,8 +133,8 @@ func WriteConfigFile(filePath string, perm os.FileMode) error {
 func Get(key string) (interface{}, error) {
 	keys := strings.Split(key, ":")
 	mut.RLock()
+	defer mut.RUnlock()
 	conf, ok := configs[keys[0]]
-	mut.RUnlock()
 	if !ok {
 		return nil, fmt.Errorf("key %q not found", key)
 	}
