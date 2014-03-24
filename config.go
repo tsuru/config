@@ -1,4 +1,4 @@
-// Copyright 2013 config authors. All rights reserved.
+// Copyright 2014 config authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -11,7 +11,7 @@ import (
 	"github.com/howeyc/fsnotify"
 	"io"
 	"io/ioutil"
-	"launchpad.net/goyaml"
+	"gopkg.in/v1/yaml"
 	"os"
 	"strconv"
 	"strings"
@@ -24,7 +24,7 @@ var (
 )
 
 func readConfigBytes(data []byte, out interface{}) error {
-	return goyaml.Unmarshal(data, out)
+	return yaml.Unmarshal(data, out)
 }
 
 // ReadConfigBytes receives a slice of bytes and builds the internal
@@ -98,7 +98,7 @@ func ReadAndWatchConfigFile(filePath string) error {
 // to "perm".
 func WriteConfigFile(filePath string, perm os.FileMode) error {
 	mut.RLock()
-	b, err := goyaml.Marshal(configs)
+	b, err := yaml.Marshal(configs)
 	mut.RUnlock()
 	if err != nil {
 		return err
