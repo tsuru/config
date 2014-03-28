@@ -178,6 +178,7 @@ func GetInt(key string) (int, error) {
 	return 0, &invalidValue{key, "int"}
 }
 
+// GetUint parses and returns an unsigned integer from the config file.
 func GetUint(key string) (uint, error) {
 	value, err := Get(key)
 	if err != nil {
