@@ -226,6 +226,50 @@ func (s *S) TestGetStringShouldReturnErrorIfTheKeyDoesNotExist(c *C) {
 	c.Assert(err, ErrorMatches, `key "xpta" not found`)
 }
 
+func (s *S) TestGetDuration(c *C) {
+	configFile := "testdata/config2.yml"
+	err := ReadConfigFile(configFile)
+	c.Assert(err, IsNil)
+	value, err := GetDuration("interval")
+	c.Check(err, IsNil)
+	c.Check(value, Equals, time.Duration(1e9))
+	value, err = GetDuration("superinterval")
+	c.Check(err, IsNil)
+	c.Check(value, Equals, time.Duration(1e9))
+	value, err = GetDuration("wait")
+	c.Check(err, IsNil)
+	c.Check(value, Equals, time.Duration(1e6))
+	value, err = GetDuration("one_year")
+	c.Check(err, IsNil)
+	c.Check(value, Equals, time.Duration(365*24*time.Hour))
+	value, err = GetDuration("nano")
+	c.Check(err, IsNil)
+	c.Check(value, Equals, time.Duration(1))
+	value, err = GetDuration("human-interval")
+	c.Check(err, IsNil)
+	c.Check(value, Equals, time.Duration(10e9))
+}
+
+func (s *S) TestGetDurationUnknown(c *C) {
+	configFile := "testdata/config2.yml"
+	err := ReadConfigFile(configFile)
+	c.Assert(err, IsNil)
+	value, err := GetDuration("intervalll")
+	c.Assert(err, NotNil)
+	c.Assert(err, ErrorMatches, `key "intervalll" not found`)
+	c.Assert(value, Equals, time.Duration(0))
+}
+
+func (s *S) TestGetDurationInvalid(c *C) {
+	configFile := "testdata/config.yml"
+	err := ReadConfigFile(configFile)
+	c.Assert(err, IsNil)
+	value, err := GetDuration("auth:key")
+	c.Assert(value, Equals, time.Duration(0))
+	c.Assert(err, NotNil)
+	c.Assert(err, ErrorMatches, `value for the key "auth:key" is not a duration`)
+}
+
 func (s *S) TestGetBool(c *C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)

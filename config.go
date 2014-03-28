@@ -9,13 +9,14 @@ package config
 import (
 	"fmt"
 	"github.com/howeyc/fsnotify"
+	"gopkg.in/v1/yaml"
 	"io"
 	"io/ioutil"
-	"gopkg.in/v1/yaml"
 	"os"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 var (
@@ -189,6 +190,34 @@ func GetUint(key string) (uint, error) {
 		return uint(v), nil
 	}
 	return 0, &invalidValue{key, "uint"}
+}
+
+// GetDuration parses and returns a duration from the config file. It may be an
+// integer or a number specifying the amount of nanoseconds.
+//
+// Here are some examples of valid durations:
+//
+//  - 1h30m0s
+//  - 1e9 (one second)
+//  - 100e6 (one hundred milliseconds)
+//  - 1 (one nanosecond)
+//  - 1000000000 (one billion nanoseconds, or one second)
+func GetDuration(key string) (time.Duration, error) {
+	value, err := Get(key)
+	if err != nil {
+		return 0, err
+	}
+	switch value.(type) {
+	case int:
+		return time.Duration(value.(int)), nil
+	case float64:
+		return time.Duration(value.(float64)), nil
+	case string:
+		if value, err := time.ParseDuration(value.(string)); err == nil {
+			return value, nil
+		}
+	}
+	return 0, &invalidValue{key, "duration"}
 }
 
 // GetBool does a type assertion before returning the requested value

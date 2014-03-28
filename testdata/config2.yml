@@ -11,6 +11,12 @@ auth:
 xpto: ble
 istrue: false
 fakebool: foo
+interval: 1e9
+superinterval: 1000000000
+wait: 1e6
+one_year: 3.1536e+16
+nano: 1
+human-interval: 10s
 names:
   - Mary
   - John
