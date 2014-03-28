@@ -7,11 +7,11 @@
 package config
 
 import (
-	. "launchpad.net/gocheck"
+	"launchpad.net/gocheck"
 	"sync"
 )
 
-func (s *S) TestConfigFunctionsAreThreadSafe(c *C) {
+func (s *S) TestConfigFunctionsAreThreadSafe(c *gocheck.C) {
 	var wg sync.WaitGroup
 	Set("name", "gopher")
 	wg.Add(3)
