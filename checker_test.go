@@ -68,29 +68,29 @@ func (s *CheckerSuite) TearDownTest(c *gocheck.C) {
 }
 
 func (s *CheckerSuite) TestCheckConfig(c *gocheck.C) {
-	err := Check(configs)
+	err := Check()
 	c.Assert(err, gocheck.IsNil)
 }
 
 func (s *CheckerSuite) TestCheckDockerJustCheckIfProvisionerIsDocker(c *gocheck.C) {
 	configs["provisioner"] = "test"
-	err := CheckProvisioner(configs)
+	err := CheckProvisioner()
 	c.Assert(err, gocheck.IsNil)
 }
 
 func (s *CheckerSuite) TestCheckDockerIsNotConfigured(c *gocheck.C) {
 	delete(configs, "docker")
-	err := CheckDocker(configs)
+	err := CheckDocker()
 	c.Assert(err, gocheck.NotNil)
 }
 
 func (s *CheckerSuite) TestCheckDockerBasicConfig(c *gocheck.C) {
-	err := CheckDockerBasicConfig(configs["docker"].(map[interface{}]interface{}))
+	err := CheckDockerBasicConfig()
 	c.Assert(err, gocheck.IsNil)
 }
 
 func (s *CheckerSuite) TestCheckDockerBasicConfigError(c *gocheck.C) {
 	delete(configs["docker"].(map[interface{}]interface{}), "collection")
-	err := CheckDockerBasicConfig(configs["docker"].(map[interface{}]interface{}))
+	err := CheckDockerBasicConfig()
 	c.Assert(err, gocheck.NotNil)
 }

@@ -10,40 +10,46 @@ import (
 )
 
 // Check a parsed config file.
-func Check(config map[interface{}]interface{}) error {
-	return CheckProvisioner(config)
+func Check() error {
+	return CheckProvisioner()
 
 }
 
 // Check docker configs
-func CheckProvisioner(config map[interface{}]interface{}) error {
-	if config["provisioner"] == "docker" {
-		return CheckDocker(config)
+func CheckProvisioner() error {
+	if configs["provisioner"] == "docker" {
+		return CheckDocker()
 	}
 	return nil
 }
 
-func CheckDocker(config map[interface{}]interface{}) error {
-	if _, ok := config["docker"]; !ok {
+func CheckDocker() error {
+	if _, err := Get("docker"); err != nil {
 		return errors.New("Config Error: you should configure docker.")
 	}
-	err := CheckDockerBasicConfig(config["docker"].(map[interface{}]interface{}))
+	err := CheckDockerBasicConfig()
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func CheckDockerBasicConfig(config map[interface{}]interface{}) error {
+func CheckDockerBasicConfig() error {
 	basicConfigs := []string{
-		"repository-namespace",
-		"collection",
-		"deploy-cmd",
+		"docker:repository-namespace",
+		"docker:collection",
+		"docker:deploy-cmd",
+		"docker:ssh-agent-port",
+		"docker:ssh",
+		"docker:ssh:add-key-cmd",
+		"docker:ssh:public-key",
+		"docker:ssh:user",
+		"docker:run-cmd:bin",
+		"docker:run-cmd:port",
 	}
 	for _, key := range basicConfigs {
-		if _, ok := config[key]; !ok {
-			errorMsg := fmt.Sprintf("Config Error: you should configure %s", key)
-			return errors.New(errorMsg)
+		if _, err := Get(key); err != nil {
+			return fmt.Errorf("Config Error: you should configure %s", key)
 		}
 	}
 	return nil
