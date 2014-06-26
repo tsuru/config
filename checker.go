@@ -15,7 +15,7 @@ func Check() error {
 
 }
 
-// Check docker configs
+// Check provisioner configs
 func CheckProvisioner() error {
 	if configs["provisioner"] == "docker" {
 		return CheckDocker()
@@ -23,6 +23,7 @@ func CheckProvisioner() error {
 	return nil
 }
 
+// Check Docker configs
 func CheckDocker() error {
 	if _, err := Get("docker"); err != nil {
 		return errors.New("Config Error: you should configure docker.")
@@ -31,9 +32,14 @@ func CheckDocker() error {
 	if err != nil {
 		return err
 	}
+	err = CheckScheduler()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
+// Check default configs to Docker.
 func CheckDockerBasicConfig() error {
 	basicConfigs := []string{
 		"docker:repository-namespace",
@@ -51,6 +57,24 @@ func CheckDockerBasicConfig() error {
 		if _, err := Get(key); err != nil {
 			return fmt.Errorf("Config Error: you should configure %s", key)
 		}
+	}
+	return nil
+}
+
+func CheckScheduler() error {
+	if scheduler, err := Get("docker:segregate"); err == nil && scheduler == true {
+		if servers, err := Get("docker:servers"); err == nil && servers != nil {
+			return fmt.Errorf("Your scheduler is the segregate. Please remove the servers conf in docker.")
+		}
+		for _, value := range []string{"docker:scheduler:redis-server", "docker:scheduler:redis-prefix"} {
+			if _, err := Get(value); err != nil {
+				return fmt.Errorf("You should configure %s.", value)
+			}
+		}
+		return nil
+	}
+	if servers, err := Get("docker:servers"); err != nil || servers == nil {
+		return fmt.Errorf("You should configure the docker servers.")
 	}
 	return nil
 }

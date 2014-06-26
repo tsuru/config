@@ -94,3 +94,26 @@ func (s *CheckerSuite) TestCheckDockerBasicConfigError(c *gocheck.C) {
 	err := CheckDockerBasicConfig()
 	c.Assert(err, gocheck.NotNil)
 }
+
+func (s *CheckerSuite) TestCheckSchedulerConfig(c *gocheck.C) {
+	err := CheckScheduler()
+	c.Assert(err, gocheck.IsNil)
+}
+
+func (s *CheckerSuite) TestCheckSchedulerSegregateWithServersConfig(c *gocheck.C) {
+	Set("docker:servers", []string{"server1", "server2"})
+	err := CheckScheduler()
+	c.Assert(err, gocheck.NotNil)
+}
+
+func (s *CheckerSuite) TestCheckSchedulerRoundRobinWithoutServersConfig(c *gocheck.C) {
+	Set("docker:segregate", false)
+	err := CheckScheduler()
+	c.Assert(err, gocheck.NotNil)
+}
+
+func (s *CheckerSuite) TestCheckSchedulerSegregateWithoutRedisConf(c *gocheck.C) {
+	Unset("docker:scheduler:redis-server")
+	err := CheckScheduler()
+	c.Assert(err, gocheck.NotNil)
+}
