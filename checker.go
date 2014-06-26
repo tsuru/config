@@ -65,6 +65,8 @@ func CheckDockerBasicConfig() error {
 	return nil
 }
 
+// Check Schedulers
+// It's verify your scheduler configuration and validate related confs.
 func CheckScheduler() error {
 	if scheduler, err := Get("docker:segregate"); err == nil && scheduler == true {
 		if servers, err := Get("docker:servers"); err == nil && servers != nil {
@@ -83,6 +85,8 @@ func CheckScheduler() error {
 	return nil
 }
 
+// Check Router
+// It's verify your router configuration and validate related confs.
 func CheckRouter() error {
 	if router, err := Get("docker:router"); err == nil && router == "hipache" {
 		if hipache, err := Get("hipache"); err != nil || hipache == nil {
