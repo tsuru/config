@@ -117,3 +117,14 @@ func (s *CheckerSuite) TestCheckSchedulerSegregateWithoutRedisConf(c *gocheck.C)
 	err := CheckScheduler()
 	c.Assert(err, gocheck.NotNil)
 }
+
+func (s *CheckerSuite) TestCheckRouter(c *gocheck.C) {
+	err := CheckRouter()
+	c.Assert(err, gocheck.IsNil)
+}
+
+func (s *CheckerSuite) TestCheckRouterHipacheShouldHaveHipachConf(c *gocheck.C) {
+	Unset("hipache")
+	err := CheckRouter()
+	c.Assert(err, gocheck.NotNil)
+}

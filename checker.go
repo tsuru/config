@@ -36,6 +36,10 @@ func CheckDocker() error {
 	if err != nil {
 		return err
 	}
+	err = CheckRouter()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -75,6 +79,15 @@ func CheckScheduler() error {
 	}
 	if servers, err := Get("docker:servers"); err != nil || servers == nil {
 		return fmt.Errorf("You should configure the docker servers.")
+	}
+	return nil
+}
+
+func CheckRouter() error {
+	if router, err := Get("docker:router"); err == nil && router == "hipache" {
+		if hipache, err := Get("hipache"); err != nil || hipache == nil {
+			return fmt.Errorf("You should configure hipache router")
+		}
 	}
 	return nil
 }
