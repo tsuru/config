@@ -190,6 +190,18 @@ func (s *S) TestGetStringExpandVars(c *gocheck.C) {
 	c.Assert(value, gocheck.Equals, "6.6.6.6")
 }
 
+func (s *S) TestGetIntExpandVars(c *gocheck.C) {
+	configFile := "testdata/config3.yml"
+	err := os.Setenv("DBPORT", "6680")
+	defer os.Setenv("DBPORT", "")
+	c.Assert(err, gocheck.IsNil)
+	err = ReadConfigFile(configFile)
+	c.Assert(err, gocheck.IsNil)
+	value, err := GetInt("database:port")
+	c.Assert(err, gocheck.IsNil)
+	c.Assert(value, gocheck.Equals, 6680)
+}
+
 func (s *S) TestGetString(c *gocheck.C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)
