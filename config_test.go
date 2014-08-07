@@ -6,12 +6,13 @@ package config
 
 import (
 	"errors"
-	"launchpad.net/gocheck"
 	"os"
 	"os/exec"
 	"runtime"
 	"testing"
 	"time"
+
+	"launchpad.net/gocheck"
 )
 
 func Test(t *testing.T) { gocheck.TestingT(t) }
@@ -163,6 +164,30 @@ func (s *S) TestGetConfigReturnErrorsIfTheKeyIsNotFound(c *gocheck.C) {
 	c.Assert(value, gocheck.IsNil)
 	c.Assert(err, gocheck.NotNil)
 	c.Assert(err.Error(), gocheck.Equals, `key "database:hhh" not found`)
+}
+
+func (s *S) TestGetConfigExpandVars(c *gocheck.C) {
+	configFile := "testdata/config3.yml"
+	err := os.Setenv("DBHOST", "6.6.6.6")
+	defer os.Setenv("DBHOST", "")
+	c.Assert(err, gocheck.IsNil)
+	err = ReadConfigFile(configFile)
+	c.Assert(err, gocheck.IsNil)
+	value, err := Get("database:host")
+	c.Assert(err, gocheck.IsNil)
+	c.Assert(value, gocheck.Equals, "6.6.6.6")
+}
+
+func (s *S) TestGetStringExpandVars(c *gocheck.C) {
+	configFile := "testdata/config3.yml"
+	err := os.Setenv("DBHOST", "6.6.6.6")
+	defer os.Setenv("DBHOST", "")
+	c.Assert(err, gocheck.IsNil)
+	err = ReadConfigFile(configFile)
+	c.Assert(err, gocheck.IsNil)
+	value, err := GetString("database:host")
+	c.Assert(err, gocheck.IsNil)
+	c.Assert(value, gocheck.Equals, "6.6.6.6")
 }
 
 func (s *S) TestGetString(c *gocheck.C) {

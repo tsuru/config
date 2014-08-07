@@ -8,8 +8,6 @@ package config
 
 import (
 	"fmt"
-	"github.com/howeyc/fsnotify"
-	"gopkg.in/v1/yaml"
 	"io"
 	"io/ioutil"
 	"os"
@@ -17,6 +15,9 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/howeyc/fsnotify"
+	"gopkg.in/v1/yaml"
 )
 
 var (
@@ -131,6 +132,13 @@ func WriteConfigFile(filePath string, perm os.FileMode) error {
 //
 // The key "databases:mysql:host" would return "localhost", while the key
 // "port" would return an error.
+//
+// Get will expand the value with environment values, ex.:
+//
+//   mongo: $MONGOURI
+//
+// If there is an environment variable MONGOURI=localhost/test, the key "mongo"
+// would return "localhost/test"
 func Get(key string) (interface{}, error) {
 	keys := strings.Split(key, ":")
 	mut.RLock()
@@ -144,6 +152,9 @@ func Get(key string) (interface{}, error) {
 		if !ok {
 			return nil, fmt.Errorf("key %q not found", key)
 		}
+	}
+	if v, ok := conf.(string); ok {
+		return os.ExpandEnv(v), nil
 	}
 	return conf, nil
 }
