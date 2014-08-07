@@ -185,7 +185,7 @@ func GetInt(key string) (int, error) {
 	}
 	if v, ok := value.(int); ok {
 		return v, nil
-	} else if v, ok := value.(string); ok { // Maybe a string convertible to int
+	} else if v, ok := value.(string); ok {
 		if i, err := strconv.ParseInt(v, 10, 64); err == nil {
 			return int(i), nil
 		}
