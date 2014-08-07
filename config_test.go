@@ -165,6 +165,42 @@ func (s *S) TestGetConfigReturnErrorsIfTheKeyIsNotFound(c *gocheck.C) {
 	c.Assert(err.Error(), gocheck.Equals, `key "database:hhh" not found`)
 }
 
+func (s *S) TestGetConfigExpandVars(c *gocheck.C) {
+	configFile := "testdata/config3.yml"
+	err := os.Setenv("DBHOST", "6.6.6.6")
+	defer os.Setenv("DBHOST", "")
+	c.Assert(err, gocheck.IsNil)
+	err = ReadConfigFile(configFile)
+	c.Assert(err, gocheck.IsNil)
+	value, err := Get("database:host")
+	c.Assert(err, gocheck.IsNil)
+	c.Assert(value, gocheck.Equals, "6.6.6.6")
+}
+
+func (s *S) TestGetStringExpandVars(c *gocheck.C) {
+	configFile := "testdata/config3.yml"
+	err := os.Setenv("DBHOST", "6.6.6.6")
+	defer os.Setenv("DBHOST", "")
+	c.Assert(err, gocheck.IsNil)
+	err = ReadConfigFile(configFile)
+	c.Assert(err, gocheck.IsNil)
+	value, err := GetString("database:host")
+	c.Assert(err, gocheck.IsNil)
+	c.Assert(value, gocheck.Equals, "6.6.6.6")
+}
+
+func (s *S) TestGetIntExpandVars(c *gocheck.C) {
+	configFile := "testdata/config3.yml"
+	err := os.Setenv("DBPORT", "6680")
+	defer os.Setenv("DBPORT", "")
+	c.Assert(err, gocheck.IsNil)
+	err = ReadConfigFile(configFile)
+	c.Assert(err, gocheck.IsNil)
+	value, err := GetInt("database:port")
+	c.Assert(err, gocheck.IsNil)
+	c.Assert(value, gocheck.Equals, 6680)
+}
+
 func (s *S) TestGetString(c *gocheck.C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)

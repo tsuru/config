@@ -131,6 +131,13 @@ func WriteConfigFile(filePath string, perm os.FileMode) error {
 //
 // The key "databases:mysql:host" would return "localhost", while the key
 // "port" would return an error.
+//
+// Get will expand the value with environment values, ex.:
+//
+//   mongo: $MONGOURI
+//
+// If there is an environment variable MONGOURI=localhost/test, the key "mongo"
+// would return "localhost/test"
 func Get(key string) (interface{}, error) {
 	keys := strings.Split(key, ":")
 	mut.RLock()
@@ -144,6 +151,9 @@ func Get(key string) (interface{}, error) {
 		if !ok {
 			return nil, fmt.Errorf("key %q not found", key)
 		}
+	}
+	if v, ok := conf.(string); ok {
+		return os.ExpandEnv(v), nil
 	}
 	return conf, nil
 }
@@ -174,6 +184,10 @@ func GetInt(key string) (int, error) {
 	}
 	if v, ok := value.(int); ok {
 		return v, nil
+	} else if v, ok := value.(string); ok {
+		if i, err := strconv.ParseInt(v, 10, 64); err == nil {
+			return int(i), nil
+		}
 	}
 	return 0, &invalidValue{key, "int"}
 }
