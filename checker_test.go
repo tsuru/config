@@ -6,7 +6,6 @@ package config
 
 import (
 	"errors"
-
 	"launchpad.net/gocheck"
 )
 

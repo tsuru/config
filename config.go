@@ -8,6 +8,8 @@ package config
 
 import (
 	"fmt"
+	"github.com/howeyc/fsnotify"
+	"gopkg.in/v1/yaml"
 	"io"
 	"io/ioutil"
 	"os"
@@ -15,9 +17,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/howeyc/fsnotify"
-	"gopkg.in/v1/yaml"
 )
 
 var (

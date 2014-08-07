@@ -7,9 +7,8 @@
 package config
 
 import (
-	"sync"
-
 	"launchpad.net/gocheck"
+	"sync"
 )
 
 func (s *S) TestConfigFunctionsAreThreadSafe(c *gocheck.C) {

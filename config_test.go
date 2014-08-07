@@ -6,13 +6,12 @@ package config
 
 import (
 	"errors"
+	"launchpad.net/gocheck"
 	"os"
 	"os/exec"
 	"runtime"
 	"testing"
 	"time"
-
-	"launchpad.net/gocheck"
 )
 
 func Test(t *testing.T) { gocheck.TestingT(t) }
