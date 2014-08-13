@@ -92,15 +92,21 @@ func ReadAndWatchConfigFile(filePath string) error {
 	return nil
 }
 
+// Bytes serialize the configuration in YAML format.
+func Bytes() ([]byte, error) {
+	mut.RLock()
+	defer mut.RUnlock()
+	b, err := yaml.Marshal(configs)
+	return b, err
+}
+
 // WriteConfigFile writes the configuration to the disc, using the given path.
 // The configuration is serialized in YAML format.
 //
 // This function will create the file if it does not exist, setting permissions
 // to "perm".
 func WriteConfigFile(filePath string, perm os.FileMode) error {
-	mut.RLock()
-	b, err := yaml.Marshal(configs)
-	mut.RUnlock()
+	b, err := Bytes()
 	if err != nil {
 		return err
 	}
