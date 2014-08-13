@@ -106,6 +106,37 @@ func (s *S) TestWatchConfigFileUnknownFile(c *gocheck.C) {
 	c.Assert(err, gocheck.NotNil)
 }
 
+func (s *S) TestWriteConfigBytes(c *gocheck.C) {
+	Set("database:host", "127.0.0.1")
+	Set("database:port", 3306)
+	Set("database:user", "root")
+	Set("database:password", "s3cr3t")
+	Set("database:name", "mydatabase")
+	Set("something", "otherthing")
+	data, err := WriteConfigBytes()
+	c.Assert(err, gocheck.IsNil)
+	err = ReadConfigBytes(data)
+	c.Assert(err, gocheck.IsNil)
+	v, err := Get("database:host")
+	c.Assert(err, gocheck.IsNil)
+	c.Assert(v, gocheck.Equals, "127.0.0.1")
+	v, err = Get("database:port")
+	c.Assert(err, gocheck.IsNil)
+	c.Assert(v, gocheck.Equals, 3306)
+	v, err = Get("database:user")
+	c.Assert(err, gocheck.IsNil)
+	c.Assert(v, gocheck.Equals, "root")
+	v, err = Get("database:password")
+	c.Assert(err, gocheck.IsNil)
+	c.Assert(v, gocheck.Equals, "s3cr3t")
+	v, err = Get("database:name")
+	c.Assert(err, gocheck.IsNil)
+	c.Assert(v, gocheck.Equals, "mydatabase")
+	v, err = Get("something")
+	c.Assert(err, gocheck.IsNil)
+	c.Assert(v, gocheck.Equals, "otherthing")
+}
+
 func (s *S) TestWriteConfigFile(c *gocheck.C) {
 	Set("database:host", "127.0.0.1")
 	Set("database:port", 3306)
