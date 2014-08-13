@@ -106,14 +106,14 @@ func (s *S) TestWatchConfigFileUnknownFile(c *gocheck.C) {
 	c.Assert(err, gocheck.NotNil)
 }
 
-func (s *S) TestWriteConfigBytes(c *gocheck.C) {
+func (s *S) TestBytes(c *gocheck.C) {
 	Set("database:host", "127.0.0.1")
 	Set("database:port", 3306)
 	Set("database:user", "root")
 	Set("database:password", "s3cr3t")
 	Set("database:name", "mydatabase")
 	Set("something", "otherthing")
-	data, err := WriteConfigBytes()
+	data, err := Bytes()
 	c.Assert(err, gocheck.IsNil)
 	err = ReadConfigBytes(data)
 	c.Assert(err, gocheck.IsNil)
