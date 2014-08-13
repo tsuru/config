@@ -95,8 +95,8 @@ func ReadAndWatchConfigFile(filePath string) error {
 // Bytes serialize the configuration in YAML format.
 func Bytes() ([]byte, error) {
 	mut.RLock()
+	defer mut.RUnlock()
 	b, err := yaml.Marshal(configs)
-	mut.RUnlock()
 	return b, err
 }
 
