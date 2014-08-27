@@ -76,6 +76,15 @@ func (s *S) TestConfigFile(c *gocheck.C) {
 	c.Assert(configs, gocheck.DeepEquals, expected)
 }
 
+func (s *S) TestConfigFileIsAllInOrNothing(c *gocheck.C) {
+	err := ReadConfigFile("testdata/config.yml")
+	c.Assert(err, gocheck.IsNil)
+	c.Assert(configs, gocheck.DeepEquals, expected)
+	err = ReadConfigFile("testdata/invalid_config.yml")
+	c.Assert(err, gocheck.NotNil)
+	c.Assert(configs, gocheck.DeepEquals, expected)
+}
+
 func (s *S) TestConfigFileUnknownFile(c *gocheck.C) {
 	err := ReadConfigFile("/some/unknwon/file/path")
 	c.Assert(err, gocheck.NotNil)
