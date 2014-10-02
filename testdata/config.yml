@@ -22,3 +22,4 @@ multiple-types:
   - 5.3
   - true
 negative: -10
+myfloatvalue: 0.95

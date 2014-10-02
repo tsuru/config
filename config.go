@@ -8,8 +8,6 @@ package config
 
 import (
 	"fmt"
-	"github.com/howeyc/fsnotify"
-	"gopkg.in/v1/yaml"
 	"io"
 	"io/ioutil"
 	"os"
@@ -17,6 +15,9 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/howeyc/fsnotify"
+	"gopkg.in/v1/yaml"
 )
 
 var (
@@ -196,6 +197,30 @@ func GetInt(key string) (int, error) {
 		}
 	}
 	return 0, &invalidValue{key, "int"}
+}
+
+// GetFloat works like Get, but doing type assertion and attempting
+// conversions before returning the value.
+//
+// It returns error if the key is undefined or if it is not a float.
+func GetFloat(key string) (float64, error) {
+	value, err := Get(key)
+	if err != nil {
+		return 0, err
+	}
+	switch v := value.(type) {
+	case float64:
+		return v, nil
+	case float32:
+		return float64(v), nil
+	case int:
+		return float64(v), nil
+	case string:
+		if floatVal, err := strconv.ParseFloat(v, 64); err == nil {
+			return floatVal, nil
+		}
+	}
+	return 0.0, &invalidValue{key, "float"}
 }
 
 // GetUint parses and returns an unsigned integer from the config file.

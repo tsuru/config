@@ -6,12 +6,13 @@ package config
 
 import (
 	"errors"
-	"launchpad.net/gocheck"
 	"os"
 	"os/exec"
 	"runtime"
 	"testing"
 	"time"
+
+	"launchpad.net/gocheck"
 )
 
 func Test(t *testing.T) { gocheck.TestingT(t) }
@@ -35,6 +36,7 @@ var expected = map[interface{}]interface{}{
 	"names":          []interface{}{"Mary", "John", "Anthony", "Gopher"},
 	"multiple-types": []interface{}{"Mary", 50, 5.3, true},
 	"negative":       -10,
+	"myfloatvalue":   0.95,
 }
 
 func (s *S) TearDownTest(c *gocheck.C) {
@@ -63,6 +65,7 @@ multiple-types:
   - 5.3
   - true
 negative: -10
+myfloatvalue: 0.95
 `
 	err := ReadConfigBytes([]byte(conf))
 	c.Assert(err, gocheck.IsNil)
@@ -265,6 +268,21 @@ func (s *S) TestGetInt(c *gocheck.C) {
 	value, err = GetInt("something-unknown")
 	c.Assert(err, gocheck.NotNil)
 	c.Assert(value, gocheck.Equals, 0)
+}
+
+func (s *S) TestGetFloat(c *gocheck.C) {
+	configFile := "testdata/config.yml"
+	err := ReadConfigFile(configFile)
+	c.Assert(err, gocheck.IsNil)
+	value, err := GetFloat("myfloatvalue")
+	c.Assert(err, gocheck.IsNil)
+	c.Assert(value, gocheck.Equals, 0.95)
+	value, err = GetFloat("database:port")
+	c.Assert(err, gocheck.IsNil)
+	c.Assert(value, gocheck.Equals, 8080.0)
+	value, err = GetFloat("xpto")
+	c.Assert(err, gocheck.NotNil)
+	c.Assert(value, gocheck.Equals, 0.0)
 }
 
 func (s *S) TestGetUint(c *gocheck.C) {
