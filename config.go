@@ -126,9 +126,9 @@ func WriteConfigFile(filePath string, perm os.FileMode) error {
 	return nil
 }
 
-// Get returns the value for the given key, or an eror if the key is undefined.
+// Get returns the value for the given key, or an error if the key is undefined.
 //
-// The key is composed by all the key names separated by :, in case of nested
+// The key is composed of all the key names separated by :, in case of nested
 // keys. For example, suppose we have the following configuration yaml:
 //
 //   databases:
