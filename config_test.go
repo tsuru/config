@@ -1,4 +1,4 @@
-// Copyright 2014 Globo.com. All rights reserved.
+// Copyright 2015 Globo.com. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -590,4 +590,16 @@ func (s *S) TestMergeMapsWithDiffingMaps(c *gocheck.C) {
 		},
 	}
 	c.Assert(mergeMaps(m1, m2), gocheck.DeepEquals, expected)
+}
+
+func (s *S) TestConfigFileResetsOldValues(c *gocheck.C) {
+	err := ReadConfigFile("testdata/config.yml")
+	c.Assert(err, gocheck.IsNil)
+	err = ReadConfigFile("testdata/config4.yml")
+	c.Assert(err, gocheck.IsNil)
+	expected := map[interface{}]interface{}{
+		"xpto":       "changed",
+		"my-new-key": "new",
+	}
+	c.Assert(configs, gocheck.DeepEquals, expected)
 }

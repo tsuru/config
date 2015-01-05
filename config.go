@@ -1,4 +1,4 @@
-// Copyright 2014 Globo.com. All rights reserved.
+// Copyright 2015 Globo.com. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -37,15 +37,12 @@ func readConfigBytes(data []byte, out interface{}) error {
 func ReadConfigBytes(data []byte) error {
 	mut.Lock()
 	defer mut.Unlock()
-	return readConfigBytes(data, &configs)
-}
-
-func readConfigFile(filePath string, out interface{}) error {
-	data, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		return err
+	var newConfig map[interface{}]interface{}
+	err := readConfigBytes(data, &newConfig)
+	if err == nil {
+		configs = newConfig
 	}
-	return readConfigBytes(data, out)
+	return err
 }
 
 // ReadConfigFile reads the content of a file and calls ReadConfigBytes to
@@ -54,7 +51,11 @@ func readConfigFile(filePath string, out interface{}) error {
 // It returns error if it can not read the given file or if the file contents
 // is not valid yaml.
 func ReadConfigFile(filePath string) error {
-	return readConfigFile(filePath, &configs)
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+	return ReadConfigBytes(data)
 }
 
 // ReadAndWatchConfigFile reads and watchs for changes in the configuration
@@ -79,12 +80,7 @@ func ReadAndWatchConfigFile(filePath string) error {
 			select {
 			case e := <-w.Event:
 				if e.IsModify() {
-					var tmp map[interface{}]interface{}
-					if readConfigFile(filePath, &tmp) == nil {
-						mut.Lock()
-						configs = tmp
-						mut.Unlock()
-					}
+					ReadConfigFile(filePath)
 				}
 			case <-w.Error: // just ignore errors
 			}
