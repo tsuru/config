@@ -17,7 +17,7 @@ import (
 	"time"
 
 	"github.com/howeyc/fsnotify"
-	"gopkg.in/v1/yaml"
+	"gopkg.in/yaml.v1"
 )
 
 var (
