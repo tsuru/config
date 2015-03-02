@@ -13,17 +13,26 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/howeyc/fsnotify"
 	"gopkg.in/yaml.v1"
 )
 
-var (
-	configs map[interface{}]interface{}
-	mut     sync.RWMutex
-)
+type configuration struct {
+	atomic.Value
+}
+
+func (c *configuration) Data() map[interface{}]interface{} {
+	result := c.Load()
+	if result == nil {
+		return nil
+	}
+	return result.(map[interface{}]interface{})
+}
+
+var configs configuration
 
 func readConfigBytes(data []byte, out interface{}) error {
 	return yaml.Unmarshal(data, out)
@@ -35,12 +44,10 @@ func readConfigBytes(data []byte, out interface{}) error {
 // If the given slice is not a valid yaml file, ReadConfigBytes returns a
 // non-nil error.
 func ReadConfigBytes(data []byte) error {
-	mut.Lock()
-	defer mut.Unlock()
 	var newConfig map[interface{}]interface{}
 	err := readConfigBytes(data, &newConfig)
 	if err == nil {
-		configs = newConfig
+		configs.Store(newConfig)
 	}
 	return err
 }
@@ -91,9 +98,7 @@ func ReadAndWatchConfigFile(filePath string) error {
 
 // Bytes serialize the configuration in YAML format.
 func Bytes() ([]byte, error) {
-	mut.RLock()
-	defer mut.RUnlock()
-	b, err := yaml.Marshal(configs)
+	b, err := yaml.Marshal(configs.Data())
 	return b, err
 }
 
@@ -143,9 +148,7 @@ func WriteConfigFile(filePath string, perm os.FileMode) error {
 // would return "localhost/test"
 func Get(key string) (interface{}, error) {
 	keys := strings.Split(key, ":")
-	mut.RLock()
-	defer mut.RUnlock()
-	conf, ok := configs[keys[0]]
+	conf, ok := configs.Data()[keys[0]]
 	if !ok {
 		return nil, fmt.Errorf("key %q not found", key)
 	}
@@ -161,7 +164,7 @@ func Get(key string) (interface{}, error) {
 	return conf, nil
 }
 
-// GetString works like Get, but doing a string type assertion before return
+// GetString works like Get, but does an string type assertion before returning
 // the value.
 //
 // It returns error if the key is undefined or if it is not a string.
@@ -176,8 +179,8 @@ func GetString(key string) (string, error) {
 	return "", &invalidValue{key, "string"}
 }
 
-// GetInt works like Get, but doing a int type assertion before return
-// the value.
+// GetInt works like Get, but does an int type assertion and attempts string
+// conversion before returning the value.
 //
 // It returns error if the key is undefined or if it is not a int.
 func GetInt(key string) (int, error) {
@@ -195,8 +198,8 @@ func GetInt(key string) (int, error) {
 	return 0, &invalidValue{key, "int"}
 }
 
-// GetFloat works like Get, but doing type assertion and attempting
-// conversions before returning the value.
+// GetFloat works like Get, but does a float type assertion and attempts string
+// conversion before returning the value.
 //
 // It returns error if the key is undefined or if it is not a float.
 func GetFloat(key string) (float64, error) {
@@ -364,9 +367,7 @@ func Set(key string, value interface{}) {
 			parts[i]: last,
 		}
 	}
-	mut.Lock()
-	configs = mergeMaps(configs, last)
-	mut.Unlock()
+	configs.Store(mergeMaps(configs.Data(), last))
 }
 
 // Unset removes a key from the configuration map. It returns error if the key
@@ -377,9 +378,7 @@ func Set(key string, value interface{}) {
 func Unset(key string) error {
 	var i int
 	var part string
-	mut.Lock()
-	defer mut.Unlock()
-	m := configs
+	m := configs.Data()
 	parts := strings.Split(key, ":")
 	for i, part = range parts {
 		if item, ok := m[part]; ok {
@@ -393,6 +392,7 @@ func Unset(key string) error {
 		}
 	}
 	delete(m, part)
+	configs.Store(m)
 	return nil
 }
 
