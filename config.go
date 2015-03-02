@@ -4,6 +4,9 @@
 
 // Package config provide configuration facilities, handling configuration
 // files in yaml format.
+//
+// This package has been optimized for reads, so functions write functions (Set
+// and Unset) are really slow when compared to Get functions.
 package config
 
 import (
@@ -370,15 +373,20 @@ func Set(key string, value interface{}) {
 	configs.Store(mergeMaps(configs.Data(), last))
 }
 
-// Unset removes a key from the configuration map. It returns error if the key
-// is not defined.
+// Unset removes a key from the configuration map. It returns an error if the
+// key is not defined.
 //
 // Calling this function does not remove a key from a configuration file, only
 // from the in-memory configuration object.
 func Unset(key string) error {
 	var i int
 	var part string
-	m := configs.Data()
+	data := configs.Data()
+	m := make(map[interface{}]interface{}, len(data))
+	for k, v := range data {
+		m[k] = v
+	}
+	root := m
 	parts := strings.Split(key, ":")
 	for i, part = range parts {
 		if item, ok := m[part]; ok {
@@ -388,11 +396,11 @@ func Unset(key string) error {
 				break
 			}
 		} else {
-			return fmt.Errorf("Key %q not found", key)
+			return fmt.Errorf("key %q not found", key)
 		}
 	}
 	delete(m, part)
-	configs.Store(m)
+	configs.Store(root)
 	return nil
 }
 

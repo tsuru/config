@@ -26,6 +26,7 @@ var empty = make(map[interface{}]interface{}, 0)
 var expected = map[interface{}]interface{}{
 	"database": map[interface{}]interface{}{
 		"host": "127.0.0.1",
+		"user": "root",
 		"port": 8080,
 	},
 	"auth": map[interface{}]interface{}{
@@ -49,6 +50,7 @@ func (s *S) TestConfig(c *check.C) {
 	conf := `
 database:
   host: 127.0.0.1
+  user: root
   port: 8080
 auth:
   salt: xpto
@@ -246,12 +248,16 @@ func (s *S) TestGetString(c *check.C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)
 	c.Assert(err, check.IsNil)
+	Set("some-key", "some-value")
 	value, err := GetString("xpto")
 	c.Assert(err, check.IsNil)
 	c.Assert(value, check.Equals, "ble")
 	value, err = GetString("database:host")
 	c.Assert(err, check.IsNil)
 	c.Assert(value, check.Equals, "127.0.0.1")
+	value, err = GetString("some-key")
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, "some-value")
 }
 
 func (s *S) TestGetInt(c *check.C) {
@@ -495,6 +501,9 @@ func (s *S) TestUnsetChildren(c *check.C) {
 	c.Assert(err, check.IsNil)
 	_, err = Get("database:host")
 	c.Assert(err, check.NotNil)
+	user, err := GetString("database:user")
+	c.Assert(err, check.IsNil)
+	c.Assert(user, check.Equals, "root")
 }
 
 func (s *S) TestUnsetWithUndefinedKey(c *check.C) {
@@ -502,7 +511,7 @@ func (s *S) TestUnsetWithUndefinedKey(c *check.C) {
 	c.Assert(err, check.IsNil)
 	err = Unset("database:hoster")
 	c.Assert(err, check.NotNil)
-	c.Assert(err.Error(), check.Equals, `Key "database:hoster" not found`)
+	c.Assert(err.Error(), check.Equals, `key "database:hoster" not found`)
 }
 
 func (s *S) TestUnsetMap(c *check.C) {
