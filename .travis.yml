@@ -4,9 +4,7 @@ go:
   - tip
 before_install:
   - sudo apt-get update -qqy
-  - sudo apt-get install bzr -qqy
 install:
-  - go get
-  - go get launchpad.net/gocheck
+  - go get -d -t
 script:
-  - go test
+  - go test -race

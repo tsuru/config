@@ -12,14 +12,14 @@ import (
 	"testing"
 	"time"
 
-	"launchpad.net/gocheck"
+	"gopkg.in/check.v1"
 )
 
-func Test(t *testing.T) { gocheck.TestingT(t) }
+func Test(t *testing.T) { check.TestingT(t) }
 
 type S struct{}
 
-var _ = gocheck.Suite(&S{})
+var _ = check.Suite(&S{})
 
 var expected = map[interface{}]interface{}{
 	"database": map[interface{}]interface{}{
@@ -39,11 +39,11 @@ var expected = map[interface{}]interface{}{
 	"myfloatvalue":   0.95,
 }
 
-func (s *S) TearDownTest(c *gocheck.C) {
+func (s *S) TearDownTest(c *check.C) {
 	configs = nil
 }
 
-func (s *S) TestConfig(c *gocheck.C) {
+func (s *S) TestConfig(c *check.C) {
 	conf := `
 database:
   host: 127.0.0.1
@@ -68,57 +68,57 @@ negative: -10
 myfloatvalue: 0.95
 `
 	err := ReadConfigBytes([]byte(conf))
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(configs, gocheck.DeepEquals, expected)
+	c.Assert(err, check.IsNil)
+	c.Assert(configs, check.DeepEquals, expected)
 }
 
-func (s *S) TestConfigFile(c *gocheck.C) {
+func (s *S) TestConfigFile(c *check.C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(configs, gocheck.DeepEquals, expected)
+	c.Assert(err, check.IsNil)
+	c.Assert(configs, check.DeepEquals, expected)
 }
 
-func (s *S) TestConfigFileIsAllInOrNothing(c *gocheck.C) {
+func (s *S) TestConfigFileIsAllInOrNothing(c *check.C) {
 	err := ReadConfigFile("testdata/config.yml")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(configs, gocheck.DeepEquals, expected)
+	c.Assert(err, check.IsNil)
+	c.Assert(configs, check.DeepEquals, expected)
 	err = ReadConfigFile("testdata/invalid_config.yml")
-	c.Assert(err, gocheck.NotNil)
-	c.Assert(configs, gocheck.DeepEquals, expected)
+	c.Assert(err, check.NotNil)
+	c.Assert(configs, check.DeepEquals, expected)
 }
 
-func (s *S) TestConfigFileUnknownFile(c *gocheck.C) {
+func (s *S) TestConfigFileUnknownFile(c *check.C) {
 	err := ReadConfigFile("/some/unknwon/file/path")
-	c.Assert(err, gocheck.NotNil)
+	c.Assert(err, check.NotNil)
 }
 
-func (s *S) TestWatchConfigFile(c *gocheck.C) {
+func (s *S) TestWatchConfigFile(c *check.C) {
 	err := exec.Command("cp", "testdata/config.yml", "/tmp/config-test.yml").Run()
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	err = ReadAndWatchConfigFile("/tmp/config-test.yml")
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	mut.Lock()
-	c.Check(configs, gocheck.DeepEquals, expected)
+	c.Check(configs, check.DeepEquals, expected)
 	mut.Unlock()
 	err = exec.Command("cp", "testdata/config2.yml", "/tmp/config-test.yml").Run()
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	time.Sleep(1e9)
 	expectedAuth := map[interface{}]interface{}{
 		"salt": "xpta",
 		"key":  "sometoken1234",
 	}
 	mut.Lock()
-	c.Check(configs["auth"], gocheck.DeepEquals, expectedAuth)
+	c.Check(configs["auth"], check.DeepEquals, expectedAuth)
 	mut.Unlock()
 }
 
-func (s *S) TestWatchConfigFileUnknownFile(c *gocheck.C) {
+func (s *S) TestWatchConfigFileUnknownFile(c *check.C) {
 	err := ReadAndWatchConfigFile("/some/unknwon/file/path")
-	c.Assert(err, gocheck.NotNil)
+	c.Assert(err, check.NotNil)
 }
 
-func (s *S) TestBytes(c *gocheck.C) {
+func (s *S) TestBytes(c *check.C) {
 	Set("database:host", "127.0.0.1")
 	Set("database:port", 3306)
 	Set("database:user", "root")
@@ -126,30 +126,30 @@ func (s *S) TestBytes(c *gocheck.C) {
 	Set("database:name", "mydatabase")
 	Set("something", "otherthing")
 	data, err := Bytes()
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	err = ReadConfigBytes(data)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	v, err := Get("database:host")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(v, gocheck.Equals, "127.0.0.1")
+	c.Assert(err, check.IsNil)
+	c.Assert(v, check.Equals, "127.0.0.1")
 	v, err = Get("database:port")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(v, gocheck.Equals, 3306)
+	c.Assert(err, check.IsNil)
+	c.Assert(v, check.Equals, 3306)
 	v, err = Get("database:user")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(v, gocheck.Equals, "root")
+	c.Assert(err, check.IsNil)
+	c.Assert(v, check.Equals, "root")
 	v, err = Get("database:password")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(v, gocheck.Equals, "s3cr3t")
+	c.Assert(err, check.IsNil)
+	c.Assert(v, check.Equals, "s3cr3t")
 	v, err = Get("database:name")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(v, gocheck.Equals, "mydatabase")
+	c.Assert(err, check.IsNil)
+	c.Assert(v, check.Equals, "mydatabase")
 	v, err = Get("something")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(v, gocheck.Equals, "otherthing")
+	c.Assert(err, check.IsNil)
+	c.Assert(v, check.Equals, "otherthing")
 }
 
-func (s *S) TestWriteConfigFile(c *gocheck.C) {
+func (s *S) TestWriteConfigFile(c *check.C) {
 	Set("database:host", "127.0.0.1")
 	Set("database:port", 3306)
 	Set("database:user", "root")
@@ -157,240 +157,240 @@ func (s *S) TestWriteConfigFile(c *gocheck.C) {
 	Set("database:name", "mydatabase")
 	Set("something", "otherthing")
 	err := WriteConfigFile("/tmp/config-test.yaml", 0644)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	defer os.Remove("/tmp/config-test.yaml")
 	configs = nil
 	err = ReadConfigFile("/tmp/config-test.yaml")
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	v, err := Get("database:host")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(v, gocheck.Equals, "127.0.0.1")
+	c.Assert(err, check.IsNil)
+	c.Assert(v, check.Equals, "127.0.0.1")
 	v, err = Get("database:port")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(v, gocheck.Equals, 3306)
+	c.Assert(err, check.IsNil)
+	c.Assert(v, check.Equals, 3306)
 	v, err = Get("database:user")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(v, gocheck.Equals, "root")
+	c.Assert(err, check.IsNil)
+	c.Assert(v, check.Equals, "root")
 	v, err = Get("database:password")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(v, gocheck.Equals, "s3cr3t")
+	c.Assert(err, check.IsNil)
+	c.Assert(v, check.Equals, "s3cr3t")
 	v, err = Get("database:name")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(v, gocheck.Equals, "mydatabase")
+	c.Assert(err, check.IsNil)
+	c.Assert(v, check.Equals, "mydatabase")
 	v, err = Get("something")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(v, gocheck.Equals, "otherthing")
+	c.Assert(err, check.IsNil)
+	c.Assert(v, check.Equals, "otherthing")
 }
 
-func (s *S) TestGetConfig(c *gocheck.C) {
+func (s *S) TestGetConfig(c *check.C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	value, err := Get("xpto")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(value, gocheck.Equals, "ble")
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, "ble")
 	value, err = Get("database:host")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(value, gocheck.Equals, "127.0.0.1")
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, "127.0.0.1")
 }
 
-func (s *S) TestGetConfigReturnErrorsIfTheKeyIsNotFound(c *gocheck.C) {
+func (s *S) TestGetConfigReturnErrorsIfTheKeyIsNotFound(c *check.C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	value, err := Get("xpta")
-	c.Assert(value, gocheck.IsNil)
-	c.Assert(err, gocheck.NotNil)
-	c.Assert(err.Error(), gocheck.Equals, `key "xpta" not found`)
+	c.Assert(value, check.IsNil)
+	c.Assert(err, check.NotNil)
+	c.Assert(err.Error(), check.Equals, `key "xpta" not found`)
 	value, err = Get("database:hhh")
-	c.Assert(value, gocheck.IsNil)
-	c.Assert(err, gocheck.NotNil)
-	c.Assert(err.Error(), gocheck.Equals, `key "database:hhh" not found`)
+	c.Assert(value, check.IsNil)
+	c.Assert(err, check.NotNil)
+	c.Assert(err.Error(), check.Equals, `key "database:hhh" not found`)
 }
 
-func (s *S) TestGetConfigExpandVars(c *gocheck.C) {
+func (s *S) TestGetConfigExpandVars(c *check.C) {
 	configFile := "testdata/config3.yml"
 	err := os.Setenv("DBHOST", "6.6.6.6")
 	defer os.Setenv("DBHOST", "")
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	err = ReadConfigFile(configFile)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	value, err := Get("database:host")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(value, gocheck.Equals, "6.6.6.6")
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, "6.6.6.6")
 }
 
-func (s *S) TestGetStringExpandVars(c *gocheck.C) {
+func (s *S) TestGetStringExpandVars(c *check.C) {
 	configFile := "testdata/config3.yml"
 	err := os.Setenv("DBHOST", "6.6.6.6")
 	defer os.Setenv("DBHOST", "")
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	err = ReadConfigFile(configFile)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	value, err := GetString("database:host")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(value, gocheck.Equals, "6.6.6.6")
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, "6.6.6.6")
 }
 
-func (s *S) TestGetIntExpandVars(c *gocheck.C) {
+func (s *S) TestGetIntExpandVars(c *check.C) {
 	configFile := "testdata/config3.yml"
 	err := os.Setenv("DBPORT", "6680")
 	defer os.Setenv("DBPORT", "")
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	err = ReadConfigFile(configFile)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	value, err := GetInt("database:port")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(value, gocheck.Equals, 6680)
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, 6680)
 }
 
-func (s *S) TestGetString(c *gocheck.C) {
+func (s *S) TestGetString(c *check.C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	value, err := GetString("xpto")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(value, gocheck.Equals, "ble")
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, "ble")
 	value, err = GetString("database:host")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(value, gocheck.Equals, "127.0.0.1")
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, "127.0.0.1")
 }
 
-func (s *S) TestGetInt(c *gocheck.C) {
+func (s *S) TestGetInt(c *check.C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	value, err := GetInt("database:port")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(value, gocheck.Equals, 8080)
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, 8080)
 	value, err = GetInt("xpto")
-	c.Assert(err, gocheck.NotNil)
+	c.Assert(err, check.NotNil)
 	value, err = GetInt("something-unknown")
-	c.Assert(err, gocheck.NotNil)
-	c.Assert(value, gocheck.Equals, 0)
+	c.Assert(err, check.NotNil)
+	c.Assert(value, check.Equals, 0)
 }
 
-func (s *S) TestGetFloat(c *gocheck.C) {
+func (s *S) TestGetFloat(c *check.C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	value, err := GetFloat("myfloatvalue")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(value, gocheck.Equals, 0.95)
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, 0.95)
 	value, err = GetFloat("database:port")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(value, gocheck.Equals, 8080.0)
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, 8080.0)
 	value, err = GetFloat("xpto")
-	c.Assert(err, gocheck.NotNil)
-	c.Assert(value, gocheck.Equals, 0.0)
+	c.Assert(err, check.NotNil)
+	c.Assert(value, check.Equals, 0.0)
 }
 
-func (s *S) TestGetUint(c *gocheck.C) {
+func (s *S) TestGetUint(c *check.C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	value, err := GetUint("database:port")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(value, gocheck.Equals, uint(8080))
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, uint(8080))
 	_, err = GetUint("negative")
-	c.Assert(err, gocheck.NotNil)
+	c.Assert(err, check.NotNil)
 	_, err = GetUint("auth:salt")
-	c.Assert(err, gocheck.NotNil)
+	c.Assert(err, check.NotNil)
 	_, err = GetUint("Unknown")
-	c.Assert(err, gocheck.NotNil)
+	c.Assert(err, check.NotNil)
 }
 
-func (s *S) TestGetStringShouldReturnErrorIfTheKeyDoesNotRepresentAString(c *gocheck.C) {
+func (s *S) TestGetStringShouldReturnErrorIfTheKeyDoesNotRepresentAString(c *check.C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	value, err := GetString("database:port")
-	c.Assert(value, gocheck.Equals, "")
-	c.Assert(err, gocheck.NotNil)
-	c.Assert(err, gocheck.ErrorMatches, `value for the key "database:port" is not a string`)
+	c.Assert(value, check.Equals, "")
+	c.Assert(err, check.NotNil)
+	c.Assert(err, check.ErrorMatches, `value for the key "database:port" is not a string`)
 }
 
-func (s *S) TestGetStringShouldReturnErrorIfTheKeyDoesNotExist(c *gocheck.C) {
+func (s *S) TestGetStringShouldReturnErrorIfTheKeyDoesNotExist(c *check.C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	value, err := GetString("xpta")
-	c.Assert(value, gocheck.Equals, "")
-	c.Assert(err, gocheck.NotNil)
-	c.Assert(err, gocheck.ErrorMatches, `key "xpta" not found`)
+	c.Assert(value, check.Equals, "")
+	c.Assert(err, check.NotNil)
+	c.Assert(err, check.ErrorMatches, `key "xpta" not found`)
 }
 
-func (s *S) TestGetDuration(c *gocheck.C) {
+func (s *S) TestGetDuration(c *check.C) {
 	configFile := "testdata/config2.yml"
 	err := ReadConfigFile(configFile)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	value, err := GetDuration("interval")
-	c.Check(err, gocheck.IsNil)
-	c.Check(value, gocheck.Equals, time.Duration(1e9))
+	c.Check(err, check.IsNil)
+	c.Check(value, check.Equals, time.Duration(1e9))
 	value, err = GetDuration("superinterval")
-	c.Check(err, gocheck.IsNil)
-	c.Check(value, gocheck.Equals, time.Duration(1e9))
+	c.Check(err, check.IsNil)
+	c.Check(value, check.Equals, time.Duration(1e9))
 	value, err = GetDuration("wait")
-	c.Check(err, gocheck.IsNil)
-	c.Check(value, gocheck.Equals, time.Duration(1e6))
+	c.Check(err, check.IsNil)
+	c.Check(value, check.Equals, time.Duration(1e6))
 	value, err = GetDuration("one_year")
-	c.Check(err, gocheck.IsNil)
-	c.Check(value, gocheck.Equals, time.Duration(365*24*time.Hour))
+	c.Check(err, check.IsNil)
+	c.Check(value, check.Equals, time.Duration(365*24*time.Hour))
 	value, err = GetDuration("nano")
-	c.Check(err, gocheck.IsNil)
-	c.Check(value, gocheck.Equals, time.Duration(1))
+	c.Check(err, check.IsNil)
+	c.Check(value, check.Equals, time.Duration(1))
 	value, err = GetDuration("human-interval")
-	c.Check(err, gocheck.IsNil)
-	c.Check(value, gocheck.Equals, time.Duration(10e9))
+	c.Check(err, check.IsNil)
+	c.Check(value, check.Equals, time.Duration(10e9))
 }
 
-func (s *S) TestGetDurationUnknown(c *gocheck.C) {
+func (s *S) TestGetDurationUnknown(c *check.C) {
 	configFile := "testdata/config2.yml"
 	err := ReadConfigFile(configFile)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	value, err := GetDuration("intervalll")
-	c.Assert(err, gocheck.NotNil)
-	c.Assert(err, gocheck.ErrorMatches, `key "intervalll" not found`)
-	c.Assert(value, gocheck.Equals, time.Duration(0))
+	c.Assert(err, check.NotNil)
+	c.Assert(err, check.ErrorMatches, `key "intervalll" not found`)
+	c.Assert(value, check.Equals, time.Duration(0))
 }
 
-func (s *S) TestGetDurationInvalid(c *gocheck.C) {
+func (s *S) TestGetDurationInvalid(c *check.C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	value, err := GetDuration("auth:key")
-	c.Assert(value, gocheck.Equals, time.Duration(0))
-	c.Assert(err, gocheck.NotNil)
-	c.Assert(err, gocheck.ErrorMatches, `value for the key "auth:key" is not a duration`)
+	c.Assert(value, check.Equals, time.Duration(0))
+	c.Assert(err, check.NotNil)
+	c.Assert(err, check.ErrorMatches, `value for the key "auth:key" is not a duration`)
 }
 
-func (s *S) TestGetBool(c *gocheck.C) {
+func (s *S) TestGetBool(c *check.C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	value, err := GetBool("istrue")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(value, gocheck.Equals, false)
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, false)
 }
 
-func (s *S) TestGetBoolWithNonBoolConfValue(c *gocheck.C) {
+func (s *S) TestGetBoolWithNonBoolConfValue(c *check.C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	value, err := GetBool("fakebool")
-	c.Assert(value, gocheck.Equals, false)
-	c.Assert(err, gocheck.NotNil)
-	c.Assert(err, gocheck.ErrorMatches, `value for the key "fakebool" is not a boolean`)
+	c.Assert(value, check.Equals, false)
+	c.Assert(err, check.NotNil)
+	c.Assert(err, check.ErrorMatches, `value for the key "fakebool" is not a boolean`)
 }
 
-func (s *S) TestGetBoolUndeclaredValue(c *gocheck.C) {
+func (s *S) TestGetBoolUndeclaredValue(c *check.C) {
 	value, err := GetBool("something-unknown")
-	c.Assert(value, gocheck.Equals, false)
-	c.Assert(err, gocheck.NotNil)
-	c.Assert(err.Error(), gocheck.Equals, `key "something-unknown" not found`)
+	c.Assert(value, check.Equals, false)
+	c.Assert(err, check.NotNil)
+	c.Assert(err.Error(), check.Equals, `key "something-unknown" not found`)
 }
 
-func (s *S) TestGetList(c *gocheck.C) {
+func (s *S) TestGetList(c *check.C) {
 	var tests = []struct {
 		key      string
 		expected []string
@@ -418,107 +418,107 @@ func (s *S) TestGetList(c *gocheck.C) {
 		},
 	}
 	err := ReadConfigFile("testdata/config.yml")
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	Set("dynamic", []string{"Mary", "Petter"})
 	for _, t := range tests {
 		values, err := GetList(t.key)
-		c.Check(err, gocheck.DeepEquals, t.err)
-		c.Check(values, gocheck.DeepEquals, t.expected)
+		c.Check(err, check.DeepEquals, t.err)
+		c.Check(values, check.DeepEquals, t.expected)
 	}
 }
 
-func (s *S) TestGetListUndeclaredValue(c *gocheck.C) {
+func (s *S) TestGetListUndeclaredValue(c *check.C) {
 	value, err := GetList("something-unknown")
-	c.Assert(value, gocheck.IsNil)
-	c.Assert(err, gocheck.NotNil)
-	c.Assert(err.Error(), gocheck.Equals, `key "something-unknown" not found`)
+	c.Assert(value, check.IsNil)
+	c.Assert(err, check.NotNil)
+	c.Assert(err.Error(), check.Equals, `key "something-unknown" not found`)
 }
 
-func (s *S) TestGetListWithStringers(c *gocheck.C) {
+func (s *S) TestGetListWithStringers(c *check.C) {
 	err := errors.New("failure")
 	Set("what", []interface{}{err})
 	value, err := GetList("what")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(value, gocheck.DeepEquals, []string{"failure"})
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.DeepEquals, []string{"failure"})
 }
 
-func (s *S) TestSet(c *gocheck.C) {
+func (s *S) TestSet(c *check.C) {
 	err := ReadConfigFile("testdata/config.yml")
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	Set("xpto", "bla")
 	value, err := GetString("xpto")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(value, gocheck.Equals, "bla")
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, "bla")
 }
 
-func (s *S) TestSetChildren(c *gocheck.C) {
+func (s *S) TestSetChildren(c *check.C) {
 	err := ReadConfigFile("testdata/config.yml")
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	Set("database:host", "database.com")
 	value, err := GetString("database:host")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(value, gocheck.Equals, "database.com")
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, "database.com")
 }
 
-func (s *S) TestSetChildrenDoesNotImpactOtherChild(c *gocheck.C) {
+func (s *S) TestSetChildrenDoesNotImpactOtherChild(c *check.C) {
 	err := ReadConfigFile("testdata/config.yml")
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	Set("database:host", "database.com")
 	value, err := Get("database:port")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(value, gocheck.Equals, 8080)
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, 8080)
 }
 
-func (s *S) TestSetMap(c *gocheck.C) {
+func (s *S) TestSetMap(c *check.C) {
 	err := ReadConfigFile("testdata/config.yml")
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	Set("database", map[interface{}]interface{}{"host": "database.com", "port": 3306})
 	host, err := GetString("database:host")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(host, gocheck.Equals, "database.com")
+	c.Assert(err, check.IsNil)
+	c.Assert(host, check.Equals, "database.com")
 	port, err := Get("database:port")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(port, gocheck.Equals, 3306)
+	c.Assert(err, check.IsNil)
+	c.Assert(port, check.Equals, 3306)
 }
 
-func (s *S) TestUnset(c *gocheck.C) {
+func (s *S) TestUnset(c *check.C) {
 	err := ReadConfigFile("testdata/config.yml")
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	err = Unset("xpto")
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	_, err = Get("xpto")
-	c.Assert(err, gocheck.NotNil)
+	c.Assert(err, check.NotNil)
 }
 
-func (s *S) TestUnsetChildren(c *gocheck.C) {
+func (s *S) TestUnsetChildren(c *check.C) {
 	err := ReadConfigFile("testdata/config.yml")
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	err = Unset("database:host")
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	_, err = Get("database:host")
-	c.Assert(err, gocheck.NotNil)
+	c.Assert(err, check.NotNil)
 }
 
-func (s *S) TestUnsetWithUndefinedKey(c *gocheck.C) {
+func (s *S) TestUnsetWithUndefinedKey(c *check.C) {
 	err := ReadConfigFile("testdata/config.yml")
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	err = Unset("database:hoster")
-	c.Assert(err, gocheck.NotNil)
-	c.Assert(err.Error(), gocheck.Equals, `Key "database:hoster" not found`)
+	c.Assert(err, check.NotNil)
+	c.Assert(err.Error(), check.Equals, `Key "database:hoster" not found`)
 }
 
-func (s *S) TestUnsetMap(c *gocheck.C) {
+func (s *S) TestUnsetMap(c *check.C) {
 	err := ReadConfigFile("testdata/config.yml")
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	err = Unset("database")
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	_, err = Get("database:host")
-	c.Assert(err, gocheck.NotNil)
+	c.Assert(err, check.NotNil)
 	_, err = Get("database:port")
-	c.Assert(err, gocheck.NotNil)
+	c.Assert(err, check.NotNil)
 }
 
-func (s *S) TestMergeMaps(c *gocheck.C) {
+func (s *S) TestMergeMaps(c *check.C) {
 	m1 := map[interface{}]interface{}{
 		"database": map[interface{}]interface{}{
 			"host": "localhost",
@@ -538,10 +538,10 @@ func (s *S) TestMergeMaps(c *gocheck.C) {
 		},
 		"memcached": []string{"mymemcached"},
 	}
-	c.Assert(mergeMaps(m1, m2), gocheck.DeepEquals, expected)
+	c.Assert(mergeMaps(m1, m2), check.DeepEquals, expected)
 }
 
-func (s *S) TestMergeMapsMultipleProcs(c *gocheck.C) {
+func (s *S) TestMergeMapsMultipleProcs(c *check.C) {
 	old := runtime.GOMAXPROCS(16)
 	defer runtime.GOMAXPROCS(old)
 	m1 := map[interface{}]interface{}{
@@ -563,10 +563,10 @@ func (s *S) TestMergeMapsMultipleProcs(c *gocheck.C) {
 		},
 		"memcached": []string{"mymemcached"},
 	}
-	c.Assert(mergeMaps(m1, m2), gocheck.DeepEquals, expected)
+	c.Assert(mergeMaps(m1, m2), check.DeepEquals, expected)
 }
 
-func (s *S) TestMergeMapsWithDiffingMaps(c *gocheck.C) {
+func (s *S) TestMergeMapsWithDiffingMaps(c *check.C) {
 	m1 := map[interface{}]interface{}{
 		"database": map[interface{}]interface{}{
 			"host": "localhost",
@@ -589,17 +589,17 @@ func (s *S) TestMergeMapsWithDiffingMaps(c *gocheck.C) {
 			"port": 3306,
 		},
 	}
-	c.Assert(mergeMaps(m1, m2), gocheck.DeepEquals, expected)
+	c.Assert(mergeMaps(m1, m2), check.DeepEquals, expected)
 }
 
-func (s *S) TestConfigFileResetsOldValues(c *gocheck.C) {
+func (s *S) TestConfigFileResetsOldValues(c *check.C) {
 	err := ReadConfigFile("testdata/config.yml")
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	err = ReadConfigFile("testdata/config4.yml")
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 	expected := map[interface{}]interface{}{
 		"xpto":       "changed",
 		"my-new-key": "new",
 	}
-	c.Assert(configs, gocheck.DeepEquals, expected)
+	c.Assert(configs, check.DeepEquals, expected)
 }

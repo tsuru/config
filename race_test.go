@@ -1,4 +1,4 @@
-// Copyright 2014 Globo.com. All rights reserved.
+// Copyright 2015 Globo.com. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -7,11 +7,12 @@
 package config
 
 import (
-	"launchpad.net/gocheck"
 	"sync"
+
+	"gopkg.in/check.v1"
 )
 
-func (s *S) TestConfigFunctionsAreThreadSafe(c *gocheck.C) {
+func (s *S) TestConfigFunctionsAreThreadSafe(c *check.C) {
 	var wg sync.WaitGroup
 	Set("name", "gopher")
 	wg.Add(3)
