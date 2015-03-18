@@ -10,6 +10,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -22,6 +23,8 @@ import (
 	"github.com/howeyc/fsnotify"
 	"gopkg.in/yaml.v1"
 )
+
+var ErrMismatchConf = errors.New("Your conf is wrong:")
 
 type configuration struct {
 	atomic.Value
@@ -156,8 +159,11 @@ func Get(key string) (interface{}, error) {
 		return nil, fmt.Errorf("key %q not found", key)
 	}
 	for _, k := range keys[1:] {
-		conf, ok = conf.(map[interface{}]interface{})[k]
+		_, ok = conf.(map[interface{}]interface{})
 		if !ok {
+			return nil, ErrMismatchConf
+		}
+		if conf, ok = conf.(map[interface{}]interface{})[k]; !ok {
 			return nil, fmt.Errorf("key %q not found", key)
 		}
 	}

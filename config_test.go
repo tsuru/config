@@ -206,6 +206,18 @@ func (s *S) TestGetConfigReturnErrorsIfTheKeyIsNotFound(c *check.C) {
 	c.Assert(value, check.IsNil)
 	c.Assert(err, check.NotNil)
 	c.Assert(err.Error(), check.Equals, `key "database:hhh" not found`)
+	_, err = Get("fakebool:err")
+	c.Assert(err, check.NotNil)
+	c.Assert(err, check.Equals, ErrMismatchConf)
+}
+
+func (s *S) TestGetConfigReturnErrorsIfMismatchConf(c *check.C) {
+	configFile := "testdata/wrong-config.yml"
+	err := ReadConfigFile(configFile)
+	c.Assert(err, check.IsNil)
+	_, err = Get("mismatch:err")
+	c.Assert(err, check.NotNil)
+	c.Assert(err, check.Equals, ErrMismatchConf)
 }
 
 func (s *S) TestGetConfigExpandVars(c *check.C) {
