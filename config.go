@@ -17,7 +17,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sync/atomic"
+	"sync"
 	"time"
 
 	"github.com/howeyc/fsnotify"
@@ -27,15 +27,24 @@ import (
 var ErrMismatchConf = errors.New("Your conf is wrong:")
 
 type configuration struct {
-	atomic.Value
+	data map[interface{}]interface{}
+	sync.RWMutex
+}
+
+func (c *configuration) Store(data map[interface{}]interface{}) {
+	c.Lock()
+	defer c.Unlock()
+	c.store(data)
+}
+
+func (c *configuration) store(data map[interface{}]interface{}) {
+	c.data = data
 }
 
 func (c *configuration) Data() map[interface{}]interface{} {
-	result := c.Load()
-	if result == nil {
-		return nil
-	}
-	return result.(map[interface{}]interface{})
+	c.RLock()
+	defer c.RUnlock()
+	return c.data
 }
 
 var configs configuration
@@ -104,8 +113,7 @@ func ReadAndWatchConfigFile(filePath string) error {
 
 // Bytes serialize the configuration in YAML format.
 func Bytes() ([]byte, error) {
-	b, err := yaml.Marshal(configs.Data())
-	return b, err
+	return yaml.Marshal(configs.Data())
 }
 
 // WriteConfigFile writes the configuration to the disc, using the given path.
@@ -154,7 +162,9 @@ func WriteConfigFile(filePath string, perm os.FileMode) error {
 // would return "localhost/test"
 func Get(key string) (interface{}, error) {
 	keys := strings.Split(key, ":")
-	conf, ok := configs.Data()[keys[0]]
+	configs.RLock()
+	defer configs.RUnlock()
+	conf, ok := configs.data[keys[0]]
 	if !ok {
 		return nil, fmt.Errorf("key %q not found", key)
 	}
@@ -376,7 +386,9 @@ func Set(key string, value interface{}) {
 			parts[i]: last,
 		}
 	}
-	configs.Store(mergeMaps(configs.Data(), last))
+	configs.Lock()
+	defer configs.Unlock()
+	configs.store(mergeMaps(configs.data, last))
 }
 
 // Unset removes a key from the configuration map. It returns an error if the
@@ -387,7 +399,9 @@ func Set(key string, value interface{}) {
 func Unset(key string) error {
 	var i int
 	var part string
-	data := configs.Data()
+	configs.Lock()
+	defer configs.Unlock()
+	data := configs.data
 	m := make(map[interface{}]interface{}, len(data))
 	for k, v := range data {
 		m[k] = v
@@ -406,7 +420,7 @@ func Unset(key string) error {
 		}
 	}
 	delete(m, part)
-	configs.Store(root)
+	configs.store(root)
 	return nil
 }
 
