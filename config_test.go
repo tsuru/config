@@ -270,6 +270,9 @@ func (s *S) TestGetString(c *check.C) {
 	value, err = GetString("some-key")
 	c.Assert(err, check.IsNil)
 	c.Assert(value, check.Equals, "some-value")
+	value, err = GetString("database:port")
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, "8080")
 }
 
 func (s *S) TestGetInt(c *check.C) {
@@ -316,14 +319,14 @@ func (s *S) TestGetUint(c *check.C) {
 	c.Assert(err, check.NotNil)
 }
 
-func (s *S) TestGetStringShouldReturnErrorIfTheKeyDoesNotRepresentAString(c *check.C) {
+func (s *S) TestGetStringShouldReturnErrorIfTheKeyDoesNotRepresentAStringOrInt(c *check.C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)
 	c.Assert(err, check.IsNil)
-	value, err := GetString("database:port")
+	value, err := GetString("myfloatvalue")
 	c.Assert(value, check.Equals, "")
 	c.Assert(err, check.NotNil)
-	c.Assert(err, check.ErrorMatches, `value for the key "database:port" is not a string`)
+	c.Assert(err, check.ErrorMatches, `value for the key "myfloatvalue" is not a string|int|int64`)
 }
 
 func (s *S) TestGetStringShouldReturnErrorIfTheKeyDoesNotExist(c *check.C) {

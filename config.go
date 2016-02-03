@@ -202,7 +202,7 @@ func GetString(key string) (string, error) {
                                 return v, nil
                         }
         }
-	return "", &invalidValue{key, "string"}
+	return "", &invalidValue{key, "string|int|int64"}
 }
 
 // GetInt works like Get, but does an int type assertion and attempts string
