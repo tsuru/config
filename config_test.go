@@ -500,6 +500,17 @@ func (s *S) TestSetMap(c *check.C) {
 	c.Assert(port, check.Equals, 3306)
 }
 
+func (s *S) TestSetCallback(c *check.C) {
+	err := ReadConfigFile("testdata/config.yml")
+	c.Assert(err, check.IsNil)
+	Set("xpto", func() interface{} {
+		return "bla"
+	})
+	value, err := GetString("xpto")
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, "bla")
+}
+
 func (s *S) TestUnset(c *check.C) {
 	err := ReadConfigFile("testdata/config.yml")
 	c.Assert(err, check.IsNil)
