@@ -269,6 +269,10 @@ func GetInt(key string) (int, error) {
 		if i, err := strconv.ParseInt(v, 10, 64); err == nil {
 			return int(i), nil
 		}
+	} else if v, err := GetFloat(key); err == nil {
+		if float64(int(v)) == v {
+			return int(v), nil
+		}
 	}
 	return 0, &invalidValue{key, "int"}
 }
@@ -299,11 +303,7 @@ func GetFloat(key string) (float64, error) {
 
 // GetUint parses and returns an unsigned integer from the config file.
 func GetUint(key string) (uint, error) {
-	value, err := Get(key)
-	if err != nil {
-		return 0, err
-	}
-	if v, ok := value.(int); ok {
+	if v, err := GetInt(key); err == nil {
 		if v < 0 {
 			return 0, &invalidValue{key, "uint"}
 		}
