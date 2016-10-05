@@ -1,0 +1,23 @@
+# Copyright 2014 Globo.com. All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
+database: $DATABASE
+auth:
+  salt: xpta
+  key: sometoken1234
+xpto: ble
+istrue: $ISTRUE
+fakebool: foo
+interval: 1e9
+superinterval: 1000000000
+wait: 1e6
+one_year: 3.1536e+16
+nano: 1
+human-interval: 10s
+names:
+  - Mary
+  - John
+  - Anthony
+  - Gopher
+multiple-types: $TYPES

@@ -209,6 +209,16 @@ func (s *S) TestGetConfigReturnErrorsIfTheKeyIsNotFound(c *check.C) {
 	_, err = Get("fakebool:err")
 	c.Assert(err, check.NotNil)
 	c.Assert(err, check.Equals, ErrMismatchConf)
+	configFile = "testdata/config5.yml"
+	err = ReadConfigFile(configFile)
+	c.Assert(err, check.IsNil)
+	err = os.Setenv("DATABASE", "{\"host\":\"6.6.6.6\"}")
+	defer os.Unsetenv("DATABASE")
+	_, err = Get("database:port")
+	c.Assert(err.Error(), check.Equals, `key "database:port" not found`)
+	err = os.Setenv("DATABASE", "{\"mongo\": {\"host\":\"6.6.6.6\"}}")
+	_, err = Get("database:mongo:port")
+	c.Assert(err.Error(), check.Equals, `key "database:mongo:port" not found`)
 }
 
 func (s *S) TestGetConfigReturnErrorsIfMismatchConf(c *check.C) {
@@ -232,10 +242,71 @@ func (s *S) TestGetConfigExpandVars(c *check.C) {
 	c.Assert(value, check.Equals, "6.6.6.6")
 }
 
+func (s *S) TestGetConfigExpandVarsJsonObject(c *check.C) {
+	configFile := "testdata/config5.yml"
+	err := os.Setenv("DATABASE", "{\"host\":\"6.6.6.6\", \"port\": 27017}")
+	defer os.Unsetenv("DATABASE")
+	c.Assert(err, check.IsNil)
+	err = ReadConfigFile(configFile)
+	c.Assert(err, check.IsNil)
+	value, err := Get("database")
+	c.Assert(err, check.IsNil)
+	valueMap := value.(map[interface{}]interface{})
+	expectedMap := map[interface{}]interface{}{
+		"host": "6.6.6.6",
+		"port": float64(27017),
+	}
+	for k := range valueMap {
+		c.Assert(valueMap[k], check.Equals, expectedMap[k])
+	}
+	err = os.Setenv("DATABASE", "{\"mongo\": {\"config\": {\"host\":\"6.6.6.6\", \"port\": 27017}}}")
+	c.Assert(err, check.IsNil)
+	value, err = Get("database:mongo:config")
+	c.Assert(err, check.IsNil)
+	valueMap = value.(map[interface{}]interface{})
+	for k := range valueMap {
+		c.Assert(valueMap[k], check.Equals, expectedMap[k])
+	}
+}
+
+func (s *S) TestGetConfigExpandVarsJsonList(c *check.C) {
+	configFile := "testdata/config5.yml"
+	err := os.Setenv("TYPES", "[10, 5, \"abc\"]")
+	defer os.Unsetenv("TYPES")
+	c.Assert(err, check.IsNil)
+	err = ReadConfigFile(configFile)
+	c.Assert(err, check.IsNil)
+	value, err := Get("multiple-types")
+	c.Assert(err, check.IsNil)
+	expectedList := []interface{}{float64(10), float64(5), "abc"}
+	for i := range expectedList {
+		c.Assert(expectedList[i], check.Equals, value.([]interface{})[i])
+	}
+	err = os.Setenv("TYPES", "{\"obj1\": {\"obj2\": {\"list\": [10, 5, \"abc\"]}}}")
+	c.Assert(err, check.IsNil)
+	value, err = Get("multiple-types:obj1:obj2:list")
+	c.Assert(err, check.IsNil)
+	for i := range expectedList {
+		c.Assert(expectedList[i], check.Equals, value.([]interface{})[i])
+	}
+}
+
 func (s *S) TestGetStringExpandVars(c *check.C) {
 	configFile := "testdata/config3.yml"
 	err := os.Setenv("DBHOST", "6.6.6.6")
 	defer os.Setenv("DBHOST", "")
+	c.Assert(err, check.IsNil)
+	err = ReadConfigFile(configFile)
+	c.Assert(err, check.IsNil)
+	value, err := GetString("database:host")
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, "6.6.6.6")
+}
+
+func (s *S) TestGetConfigStringExpandVarsJsonObject(c *check.C) {
+	configFile := "testdata/config5.yml"
+	err := os.Setenv("DATABASE", "{\"host\":\"6.6.6.6\", \"port\": 27017}")
+	defer os.Unsetenv("DATABASE")
 	c.Assert(err, check.IsNil)
 	err = ReadConfigFile(configFile)
 	c.Assert(err, check.IsNil)
@@ -289,6 +360,18 @@ func (s *S) TestGetInt(c *check.C) {
 	c.Assert(value, check.Equals, 0)
 }
 
+func (s *S) TestGetIntExpandVarsJsonObject(c *check.C) {
+	configFile := "testdata/config5.yml"
+	err := os.Setenv("DATABASE", "{\"mongo\": {\"host\":\"6.6.6.6\", \"port\": 27017}}")
+	defer os.Unsetenv("DATABASE")
+	c.Assert(err, check.IsNil)
+	err = ReadConfigFile(configFile)
+	c.Assert(err, check.IsNil)
+	value, err := GetInt("database:mongo:port")
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, 27017)
+}
+
 func (s *S) TestGetFloat(c *check.C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)
@@ -304,6 +387,18 @@ func (s *S) TestGetFloat(c *check.C) {
 	c.Assert(value, check.Equals, 0.0)
 }
 
+func (s *S) TestGetFloatExpandVarsJsonObject(c *check.C) {
+	configFile := "testdata/config5.yml"
+	err := os.Setenv("DATABASE", "{\"mongo\": {\"host\":\"6.6.6.6\", \"port\": 27017}}")
+	defer os.Unsetenv("DATABASE")
+	c.Assert(err, check.IsNil)
+	err = ReadConfigFile(configFile)
+	c.Assert(err, check.IsNil)
+	value, err := GetFloat("database:mongo:port")
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, float64(27017))
+}
+
 func (s *S) TestGetUint(c *check.C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)
@@ -317,6 +412,18 @@ func (s *S) TestGetUint(c *check.C) {
 	c.Assert(err, check.NotNil)
 	_, err = GetUint("Unknown")
 	c.Assert(err, check.NotNil)
+}
+
+func (s *S) TestGetUintExpandVarsJsonObject(c *check.C) {
+	configFile := "testdata/config5.yml"
+	err := os.Setenv("DATABASE", "{\"mongo\": {\"host\":\"6.6.6.6\", \"port\": 27017}}")
+	defer os.Unsetenv("DATABASE")
+	c.Assert(err, check.IsNil)
+	err = ReadConfigFile(configFile)
+	c.Assert(err, check.IsNil)
+	value, err := GetUint("database:mongo:port")
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, uint(27017))
 }
 
 func (s *S) TestGetStringShouldReturnErrorIfTheKeyDoesNotRepresentAStringOrInt(c *check.C) {
@@ -392,6 +499,18 @@ func (s *S) TestGetBool(c *check.C) {
 	c.Assert(value, check.Equals, false)
 }
 
+func (s *S) TestGetBoolExpandVarsJsonObject(c *check.C) {
+	configFile := "testdata/config5.yml"
+	err := os.Setenv("ISTRUE", "{\"obj\": {\"istrue\": true}}")
+	defer os.Unsetenv("ISTRUE")
+	c.Assert(err, check.IsNil)
+	err = ReadConfigFile(configFile)
+	c.Assert(err, check.IsNil)
+	value, err := GetBool("istrue:obj:istrue")
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.Equals, true)
+}
+
 func (s *S) TestGetBoolWithNonBoolConfValue(c *check.C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)
@@ -459,6 +578,30 @@ func (s *S) TestGetListWithStringers(c *check.C) {
 	value, err := GetList("what")
 	c.Assert(err, check.IsNil)
 	c.Assert(value, check.DeepEquals, []string{"failure"})
+}
+
+func (s *S) TestGetListExpandedVarsJsonList(c *check.C) {
+	configFile := "testdata/config5.yml"
+	err := os.Setenv("TYPES", "[\"a\", \"abc\"]")
+	defer os.Unsetenv("TYPES")
+	c.Assert(err, check.IsNil)
+	err = ReadConfigFile(configFile)
+	c.Assert(err, check.IsNil)
+	value, err := GetList("multiple-types")
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.DeepEquals, []string{"a", "abc"})
+}
+
+func (s *S) TestGetListExpandedVarsJsonObject(c *check.C) {
+	configFile := "testdata/config5.yml"
+	err := os.Setenv("TYPES", "{\"obj\": [\"a\", \"abc\"]}")
+	defer os.Unsetenv("TYPES")
+	c.Assert(err, check.IsNil)
+	err = ReadConfigFile(configFile)
+	c.Assert(err, check.IsNil)
+	value, err := GetList("multiple-types:obj")
+	c.Assert(err, check.IsNil)
+	c.Assert(value, check.DeepEquals, []string{"a", "abc"})
 }
 
 func (s *S) TestSet(c *check.C) {
