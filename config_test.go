@@ -547,7 +547,7 @@ func (s *S) TestGetList(c *check.C) {
 		{
 			key:      "fakebool",
 			expected: nil,
-			err:      &invalidValue{"fakebool", "list"},
+			err:      &InvalidValue{"fakebool", "list"},
 		},
 		{
 			key:      "dynamic",
