@@ -4,5 +4,4 @@
 
 Config is a Go package to manage yaml configuration files.
 
-For usage information, read our package documentation:
-<http://godoc.org/github.com/tsuru/config>.
+For usage information, read our package [documentation](http://godoc.org/github.com/tsuru/config).
