@@ -1,4 +1,4 @@
-#Config
+# Config
 
 [![Build Status](https://secure.travis-ci.org/tsuru/config.png)](http://travis-ci.org/tsuru/config)
 
