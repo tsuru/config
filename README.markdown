@@ -1,6 +1,6 @@
 #Config
 
-![ci](https://github.com/tsuru/config/workflows/ci/badge.svg)
+[![ci](https://github.com/tsuru/config/workflows/ci/badge.svg)](https://github.com/tsuru/config/actions?query=workflow%3Aci)
 
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/tsuru/config)](https://pkg.go.dev/github.com/tsuru/config)
 
