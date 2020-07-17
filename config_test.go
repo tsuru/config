@@ -43,7 +43,7 @@ var expected = map[interface{}]interface{}{
 }
 
 func (s *S) TearDownTest(c *check.C) {
-	configs.Store(empty)
+	DefaultConfig.Store(empty)
 }
 
 func (s *S) TestConfig(c *check.C) {
@@ -73,23 +73,23 @@ myfloatvalue: 0.95
 `
 	err := ReadConfigBytes([]byte(conf))
 	c.Assert(err, check.IsNil)
-	c.Assert(configs.Data(), check.DeepEquals, expected)
+	c.Assert(DefaultConfig.Data(), check.DeepEquals, expected)
 }
 
 func (s *S) TestConfigFile(c *check.C) {
 	configFile := "testdata/config.yml"
 	err := ReadConfigFile(configFile)
 	c.Assert(err, check.IsNil)
-	c.Assert(configs.Data(), check.DeepEquals, expected)
+	c.Assert(DefaultConfig.Data(), check.DeepEquals, expected)
 }
 
 func (s *S) TestConfigFileIsAllInOrNothing(c *check.C) {
 	err := ReadConfigFile("testdata/config.yml")
 	c.Assert(err, check.IsNil)
-	c.Assert(configs.Data(), check.DeepEquals, expected)
+	c.Assert(DefaultConfig.Data(), check.DeepEquals, expected)
 	err = ReadConfigFile("testdata/invalid_config.yml")
 	c.Assert(err, check.NotNil)
-	c.Assert(configs.Data(), check.DeepEquals, expected)
+	c.Assert(DefaultConfig.Data(), check.DeepEquals, expected)
 }
 
 func (s *S) TestConfigFileUnknownFile(c *check.C) {
@@ -102,7 +102,7 @@ func (s *S) TestWatchConfigFile(c *check.C) {
 	c.Assert(err, check.IsNil)
 	err = ReadAndWatchConfigFile("/tmp/config-test.yml")
 	c.Assert(err, check.IsNil)
-	c.Check(configs.Data(), check.DeepEquals, expected)
+	c.Check(DefaultConfig.Data(), check.DeepEquals, expected)
 	err = exec.Command("cp", "testdata/config2.yml", "/tmp/config-test.yml").Run()
 	c.Assert(err, check.IsNil)
 	time.Sleep(1e9)
@@ -110,7 +110,7 @@ func (s *S) TestWatchConfigFile(c *check.C) {
 		"salt": "xpta",
 		"key":  "sometoken1234",
 	}
-	c.Check(configs.Data()["auth"], check.DeepEquals, expectedAuth)
+	c.Check(DefaultConfig.Data()["auth"], check.DeepEquals, expectedAuth)
 }
 
 func (s *S) TestWatchConfigFileUnknownFile(c *check.C) {
@@ -159,7 +159,7 @@ func (s *S) TestWriteConfigFile(c *check.C) {
 	err := WriteConfigFile("/tmp/config-test.yaml", 0644)
 	c.Assert(err, check.IsNil)
 	defer os.Remove("/tmp/config-test.yaml")
-	configs.Store(empty)
+	DefaultConfig.Store(empty)
 	err = ReadConfigFile("/tmp/config-test.yaml")
 	c.Assert(err, check.IsNil)
 	v, err := Get("database:host")
@@ -781,5 +781,5 @@ func (s *S) TestConfigFileResetsOldValues(c *check.C) {
 		"xpto":       "changed",
 		"my-new-key": "new",
 	}
-	c.Assert(configs.Data(), check.DeepEquals, expected)
+	c.Assert(DefaultConfig.Data(), check.DeepEquals, expected)
 }

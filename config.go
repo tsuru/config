@@ -57,7 +57,7 @@ func (c *Configuration) Data() map[interface{}]interface{} {
 	return c.data
 }
 
-var configs Configuration
+var DefaultConfig Configuration
 
 // ReadConfigBytes receives a slice of bytes and builds the internal
 // configuration object.
@@ -65,7 +65,7 @@ var configs Configuration
 // If the given slice is not a valid yaml file, ReadConfigBytes returns a
 // non-nil error.
 func ReadConfigBytes(data []byte) error {
-	return configs.ReadConfigBytes(data)
+	return DefaultConfig.ReadConfigBytes(data)
 }
 
 func (c *Configuration) ReadConfigBytes(data []byte) error {
@@ -83,7 +83,7 @@ func (c *Configuration) ReadConfigBytes(data []byte) error {
 // It returns error if it can not read the given file or if the file contents
 // is not valid yaml.
 func ReadConfigFile(filePath string) error {
-	return configs.ReadConfigFile(filePath)
+	return DefaultConfig.ReadConfigFile(filePath)
 }
 
 func (c *Configuration) ReadConfigFile(filePath string) error {
@@ -99,7 +99,7 @@ func (c *Configuration) ReadConfigFile(filePath string) error {
 // configuration gets updated. With this function, daemons that use this
 // package may reload configuration without restarting.
 func ReadAndWatchConfigFile(filePath string) error {
-	return configs.ReadAndWatchConfigFile(filePath)
+	return DefaultConfig.ReadAndWatchConfigFile(filePath)
 }
 
 func (c *Configuration) ReadAndWatchConfigFile(filePath string) error {
@@ -131,7 +131,7 @@ func (c *Configuration) ReadAndWatchConfigFile(filePath string) error {
 
 // Bytes serialize the configuration in YAML format.
 func Bytes() ([]byte, error) {
-	return configs.Bytes()
+	return DefaultConfig.Bytes()
 }
 
 func (c *Configuration) Bytes() ([]byte, error) {
@@ -144,7 +144,7 @@ func (c *Configuration) Bytes() ([]byte, error) {
 // This function will create the file if it does not exist, setting permissions
 // to "perm".
 func WriteConfigFile(filePath string, perm os.FileMode) error {
-	return configs.WriteConfigFile(filePath, perm)
+	return DefaultConfig.WriteConfigFile(filePath, perm)
 }
 
 func (c *Configuration) WriteConfigFile(filePath string, perm os.FileMode) error {
@@ -188,7 +188,7 @@ func (c *Configuration) WriteConfigFile(filePath string, perm os.FileMode) error
 // would return "localhost/test". If the variable value is a json object/list, this
 // object will also be expanded.
 func Get(key string) (interface{}, error) {
-	return configs.Get(key)
+	return DefaultConfig.Get(key)
 }
 
 func (c *Configuration) Get(key string) (interface{}, error) {
@@ -269,7 +269,7 @@ func toInfMap(sMap map[string]interface{}) map[interface{}]interface{} {
 //
 // It returns error if the key is undefined or if it is not a string.
 func GetString(key string) (string, error) {
-	return configs.GetString(key)
+	return DefaultConfig.GetString(key)
 }
 
 func (c *Configuration) GetString(key string) (string, error) {
@@ -293,7 +293,7 @@ func (c *Configuration) GetString(key string) (string, error) {
 //
 // It returns error if the key is undefined or if it is not a int.
 func GetInt(key string) (int, error) {
-	return configs.GetInt(key)
+	return DefaultConfig.GetInt(key)
 }
 
 func (c *Configuration) GetInt(key string) (int, error) {
@@ -320,7 +320,7 @@ func (c *Configuration) GetInt(key string) (int, error) {
 //
 // It returns error if the key is undefined or if it is not a float.
 func GetFloat(key string) (float64, error) {
-	return configs.GetFloat(key)
+	return DefaultConfig.GetFloat(key)
 }
 
 func (c *Configuration) GetFloat(key string) (float64, error) {
@@ -345,7 +345,7 @@ func (c *Configuration) GetFloat(key string) (float64, error) {
 
 // GetUint parses and returns an unsigned integer from the config file.
 func GetUint(key string) (uint, error) {
-	return configs.GetUint(key)
+	return DefaultConfig.GetUint(key)
 }
 
 func (c *Configuration) GetUint(key string) (uint, error) {
@@ -369,7 +369,7 @@ func (c *Configuration) GetUint(key string) (uint, error) {
 //  - 1 (one nanosecond)
 //  - 1000000000 (one billion nanoseconds, or one second)
 func GetDuration(key string) (time.Duration, error) {
-	return configs.GetDuration(key)
+	return DefaultConfig.GetDuration(key)
 }
 
 func (c *Configuration) GetDuration(key string) (time.Duration, error) {
@@ -395,7 +395,7 @@ func (c *Configuration) GetDuration(key string) (time.Duration, error) {
 
 // GetBool does a type assertion before returning the requested value
 func GetBool(key string) (bool, error) {
-	return configs.GetBool(key)
+	return DefaultConfig.GetBool(key)
 }
 
 func (c *Configuration) GetBool(key string) (bool, error) {
@@ -423,7 +423,7 @@ func (c *Configuration) GetBool(key string) (bool, error) {
 // If GetList find an item that is not a string (for example 5.08734792), it
 // will convert the item.
 func GetList(key string) ([]string, error) {
-	return configs.GetList(key)
+	return DefaultConfig.GetList(key)
 }
 
 func (c *Configuration) GetList(key string) ([]string, error) {
@@ -494,7 +494,7 @@ func mergeMaps(map1, map2 map[interface{}]interface{}) map[interface{}]interface
 // Values defined by this function affects only runtime informatin, nothing
 // defined by Set is persisted in the filesystem or any database.
 func Set(key string, value interface{}) {
-	configs.Set(key, value)
+	DefaultConfig.Set(key, value)
 }
 
 func (c *Configuration) Set(key string, value interface{}) {
@@ -518,7 +518,7 @@ func (c *Configuration) Set(key string, value interface{}) {
 // Calling this function does not remove a key from a configuration file, only
 // from the in-memory configuration object.
 func Unset(key string) error {
-	return configs.Unset(key)
+	return DefaultConfig.Unset(key)
 }
 
 func (c *Configuration) Unset(key string) error {
