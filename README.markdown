@@ -1,4 +1,4 @@
-#Config
+# Config
 
 [![ci](https://github.com/tsuru/config/workflows/ci/badge.svg)](https://github.com/tsuru/config/actions?query=workflow%3Aci)
 
