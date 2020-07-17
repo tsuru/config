@@ -21,7 +21,7 @@ type S struct{}
 
 var _ = check.Suite(&S{})
 
-var empty = make(map[interface{}]interface{}, 0)
+var empty = make(map[interface{}]interface{})
 
 var expected = map[interface{}]interface{}{
 	"database": map[interface{}]interface{}{
@@ -93,7 +93,7 @@ func (s *S) TestConfigFileIsAllInOrNothing(c *check.C) {
 }
 
 func (s *S) TestConfigFileUnknownFile(c *check.C) {
-	err := ReadConfigFile("/some/unknwon/file/path")
+	err := ReadConfigFile("/some/unknown/file/path")
 	c.Assert(err, check.NotNil)
 }
 
@@ -114,7 +114,7 @@ func (s *S) TestWatchConfigFile(c *check.C) {
 }
 
 func (s *S) TestWatchConfigFileUnknownFile(c *check.C) {
-	err := ReadAndWatchConfigFile("/some/unknwon/file/path")
+	err := ReadAndWatchConfigFile("/some/unknown/file/path")
 	c.Assert(err, check.NotNil)
 }
 
@@ -215,11 +215,13 @@ func (s *S) TestGetConfigReturnErrorsIfTheKeyIsNotFound(c *check.C) {
 	err = ReadConfigFile(configFile)
 	c.Assert(err, check.IsNil)
 	err = os.Setenv("DATABASE", "{\"host\":\"6.6.6.6\"}")
+	c.Assert(err, check.IsNil)
 	defer os.Unsetenv("DATABASE")
 	_, err = Get("database:port")
 	c.Assert(err, check.FitsTypeOf, ErrKeyNotFound{})
 	c.Assert(err.Error(), check.Equals, `key "database:port" not found`)
 	err = os.Setenv("DATABASE", "{\"mongo\": {\"host\":\"6.6.6.6\"}}")
+	c.Assert(err, check.IsNil)
 	_, err = Get("database:mongo:port")
 	c.Assert(err, check.FitsTypeOf, ErrKeyNotFound{})
 	c.Assert(err.Error(), check.Equals, `key "database:mongo:port" not found`)
@@ -359,6 +361,7 @@ func (s *S) TestGetInt(c *check.C) {
 	c.Assert(value, check.Equals, 8080)
 	value, err = GetInt("xpto")
 	c.Assert(err, check.NotNil)
+	c.Assert(value, check.Equals, 0)
 	value, err = GetInt("something-unknown")
 	c.Assert(err, check.NotNil)
 	c.Assert(value, check.Equals, 0)

@@ -431,9 +431,8 @@ func (c *Configuration) GetList(key string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	switch value.(type) {
+	switch v := value.(type) {
 	case []interface{}:
-		v := value.([]interface{})
 		result := make([]string, len(v))
 		for i, item := range v {
 			switch v := item.(type) {
@@ -451,7 +450,7 @@ func (c *Configuration) GetList(key string) ([]string, error) {
 		}
 		return result, nil
 	case []string:
-		return value.([]string), nil
+		return v, nil
 	}
 	return nil, &InvalidValue{key, "list"}
 }
