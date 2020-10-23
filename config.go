@@ -443,7 +443,7 @@ func (c *Configuration) GetList(key string) ([]string, error) {
 			case float64:
 				result[i] = strconv.FormatFloat(v, 'f', -1, 64)
 			case string:
-				result[i] = v
+				result[i] = os.ExpandEnv(v)
 			default:
 				result[i] = fmt.Sprintf("%v", item)
 			}

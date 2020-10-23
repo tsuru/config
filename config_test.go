@@ -248,6 +248,18 @@ func (s *S) TestGetConfigExpandVars(c *check.C) {
 	c.Assert(value, check.Equals, "6.6.6.6")
 }
 
+func (s *S) TestGetConfigExpandVarsWithList(c *check.C) {
+	configFile := "testdata/config3.yml"
+	err := os.Setenv("DBHOST", "6.6.6.6")
+	defer os.Setenv("DBHOST", "")
+	c.Assert(err, check.IsNil)
+	err = ReadConfigFile(configFile)
+	c.Assert(err, check.IsNil)
+	values, err := GetList("databases")
+	c.Assert(err, check.IsNil)
+	c.Assert(values, check.DeepEquals, []string{"6.6.6.6", "host2"})
+}
+
 func (s *S) TestGetConfigExpandVarsJsonObject(c *check.C) {
 	configFile := "testdata/config5.yml"
 	err := os.Setenv("DATABASE", "{\"host\":\"6.6.6.6\", \"port\": 27017}")

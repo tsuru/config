@@ -27,3 +27,6 @@ multiple-types:
   - 50
   - 5.3
   - true
+databases:
+  - $DBHOST
+  - host2
